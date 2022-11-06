@@ -36,4 +36,6 @@ Heavily inspired by [deanishe/alfred-convert](https://github.com/deanishe/alfred
   The reference rates are usually updated around 16:00 CET on every working day, except
   on [TARGET closing days](https://www.ecb.europa.eu/home/contacts/working-hours/html/index.en.html).
 
+- All non-monetary conversions performed using [ferraridamiano/units_converter](https://github.com/ferraridamiano/units_converter). 
+
 - The displayed emoji images are from [joypixels/emoji-assets](https://github.com/joypixels/emoji-assets).
