@@ -1,0 +1,17 @@
+# Files and directories created by pub.
+.dart_tool/
+.packages
+
+# Conventional directory for build output.
+build/
+
+# IDE specific
+.idea/
+
+# macOS specific
+.DS_Store
+
+bin/*_cache/
+sign.sh
+
+.env
