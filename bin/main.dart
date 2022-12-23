@@ -1,6 +1,6 @@
 // ignore_for_file: long-method
 
-import 'dart:io' show File, exitCode, stdout;
+import 'dart:io' show File, Platform, exitCode, stdout;
 
 import 'package:alfred_workflow/alfred_workflow.dart';
 import 'package:args/args.dart';
@@ -54,8 +54,17 @@ void main(List<String> arguments) {
 
       if (_verbose) Logger.root.onRecord.listen(_logListener);
 
+      late final Currency homeCurrency;
+      try {
+        homeCurrency = Currency.values.byName(
+          (Platform.environment['home_currency'] ?? 'USD').toUpperCase(),
+        );
+      } on ArgumentError {
+        homeCurrency = Currency.USD;
+      }
+
       if (args['currencies']) {
-        await _listCurrencies();
+        await _listCurrencies(homeCurrency: homeCurrency);
       } else if (args['units']) {
         await _listUnits();
       } else {

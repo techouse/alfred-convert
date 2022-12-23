@@ -62,7 +62,7 @@ void _invalidFormat([String? message]) {
   );
 }
 
-Future<void> _listCurrencies() async {
+Future<void> _listCurrencies({Currency homeCurrency = Currency.USD}) async {
   final ExchangeRates? rates = await EcbExchangeRates().getLatest();
 
   final AlfredItems items = AlfredItems(
@@ -71,9 +71,9 @@ Future<void> _listCurrencies() async {
         '${currency.flag.runes.map((int cp) => cp.toRadixString(16)).join('-')}.png',
       ).downloadImage();
 
-      if (currency != Currency.USD) {
+      if (currency != homeCurrency) {
         try {
-          final ExchangeRate? rate = rates?.convert(currency, Currency.USD);
+          final ExchangeRate? rate = rates?.convert(currency, homeCurrency);
           final DecimalIntl convertedValue = DecimalIntl(rate!.rate);
 
           return AlfredItem(
@@ -81,7 +81,7 @@ Future<void> _listCurrencies() async {
             title: '${currency.fullName} (${currency.name})',
             subtitle: '1 ${currency.name} ≃'
                 ' ${numberFormat.format(convertedValue)}'
-                ' ${Currency.USD.name}',
+                ' ${homeCurrency.name}',
             arg: currency.name,
             match: '${currency.fullName} (${currency.name})',
             text: AlfredItemText(
@@ -150,7 +150,7 @@ Future<void> _listUnits() async {
           subtitle: unit?.symbol ?? entry.value.name,
           arg: entry.key,
           match:
-          '${entry.value.name.sentenceCase} [${unit?.symbol ?? entry.value.name}]',
+              '${entry.value.name.sentenceCase} [${unit?.symbol ?? entry.value.name}]',
           text: AlfredItemText(
             copy: entry.key,
             largeType: entry.key,
@@ -167,22 +167,39 @@ Future<void> _listUnits() async {
   _workflow.addItems(items.values.toList());
 }
 
-Future<void> _convert(String query) async {
+Future<void> _convert(
+  String query, {
+  Currency homeCurrency = Currency.USD,
+}) async {
   final List<String> parts = query.split(' ');
 
-  if (parts.length < 3 || parts.length > 4) return _invalidFormat();
+  if (parts.isEmpty) return _invalidFormat();
 
   final Decimal? value = Decimal.tryParse(parts[0]);
   if (value == null) return _invalidFormat();
 
   final String fromUnitSymbol = parts[1].trim();
-  final String toUnitSymbol =
-      parts.length == 4 && parts[2].trim().toLowerCase() == 'to'
-          ? parts[3].trim()
-          : parts[2].trim();
 
   try {
     /// First try to convert a currency
+    late final String toUnitSymbol;
+
+    switch (parts.length) {
+      case 3:
+        toUnitSymbol = parts[2].trim().toLowerCase() == 'to'
+            ? homeCurrency.name
+            : parts[2].trim();
+        break;
+      case 4:
+        if (parts[2].trim().toLowerCase() != 'to') {
+          return _invalidFormat();
+        }
+        toUnitSymbol = parts[3].trim();
+        break;
+      default:
+        toUnitSymbol = homeCurrency.name;
+    }
+
     final AlfredItem? currencyItem = await Convert.convertCurrency(
       value,
       fromUnitSymbol,
@@ -191,12 +208,16 @@ Future<void> _convert(String query) async {
     if (currencyItem != null) {
       _workflow.addItem(currencyItem);
     } else {
+      if (parts.length < 3 || parts.length > 4) return _invalidFormat();
+
       /// Then try the others
       _workflow.addItem(
         await Convert.convertUnit(
           value.toDouble(),
           fromUnitSymbol,
-          toUnitSymbol,
+          parts.length == 4 && parts[2].trim().toLowerCase() == 'to'
+              ? parts[3].trim()
+              : parts[2].trim(),
         ),
       );
     }
