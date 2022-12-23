@@ -10,31 +10,31 @@ environment:
   sdk: '>=2.17.1 <3.0.0'
 
 dependencies:
-  alfred_workflow: ^0.2.8
+  alfred_workflow: ^0.3.0+1
   autoequal: ^0.5.1
-  args: ^2.3.0
-  cli_script: ^0.2.6
-  collection: ^1.16.0
-  decimal: ^2.3.0
+  args: ^2.3.1
+  cli_script: ^0.3.0
+  collection: ^1.17.0
+  decimal: ^2.3.2
   emojis: ^0.9.9
-  envied: ^0.2.3
-  equatable: ^2.0.3
-  http: ^0.13.4
-  intl: ^0.17.0
+  envied: ^0.3.0
+  equatable: ^2.0.5
+  http: ^0.13.5
+  intl: ^0.18.0
   json_annotation: ^4.7.0
   logging: ^1.1.0
-  rational: ^2.2.0
+  rational: ^2.2.2
   recase: ^4.1.0
-  stash: ^4.3.4
-  stash_file: ^4.3.4
+  stash: ^4.4.1
+  stash_file: ^4.4.1
   timezone: ^0.9.0
-  units_converter: ^2.0.1
-  xml: ^6.1.0
+  units_converter: ^2.1.0
+  xml: ^6.2.2
 
 dev_dependencies:
   autoequal_gen: ^0.5.1
-  build_runner: ^2.1.7
-  envied_generator: ^0.2.3
-  lints: ^2.0.0
-  dart_code_metrics: ^4.8.1
-  json_serializable: ^6.1.5
+  build_runner: ^2.3.3
+  envied_generator: ^0.3.0
+  lints: ^2.0.1
+  dart_code_metrics: ^5.3.0
+  json_serializable: ^6.5.4
