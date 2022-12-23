@@ -101,7 +101,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>./conv -u</string>
+				<string>arch -x86_64 ./conv -u</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -227,16 +227,16 @@
 				<key>script</key>
 				<string>case "{query}" in
 	"money") 
-		./conv -C
+		arch -x86_64 ./conv -C
 		;;
 	"units")
-		./conv -U
+		arch -x86_64 ./conv -U
 		;;
 	"update:workflow")
-		./conv -u
+		arch -x86_64 ./conv -u
 		;;
 	*)
-		./conv -q "{query}"
+		arch -x86_64 ./conv -q "{query}"
 		;;
 esac</string>
 				<key>scriptargtype</key>
@@ -374,8 +374,6 @@ esac</string>
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>
-	<array/>
-	<key>variablesdontexport</key>
 	<array/>
 	<key>version</key>
 	<string>1.0.0</string>
