@@ -78,7 +78,7 @@ void main(List<String> arguments) {
         } else {
           final AlfredItems? items = await _workflow.getItems();
           if (items == null || items.items.isEmpty) {
-            await _convert(query);
+            await _convert(query, homeCurrency: homeCurrency);
           }
         }
       }
