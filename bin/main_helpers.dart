@@ -173,7 +173,7 @@ Future<void> _convert(
 }) async {
   final List<String> parts = query.split(' ');
 
-  if (parts.isEmpty) return _invalidFormat();
+  if (parts.length < 2) return _invalidFormat();
 
   final Decimal? value = Decimal.tryParse(parts[0]);
   if (value == null) return _invalidFormat();
