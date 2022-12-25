@@ -4,8 +4,6 @@
 <dict>
 	<key>bundleid</key>
 	<string>org.techouse.alfred-convert</string>
-	<key>category</key>
-	<string>Tools</string>
 	<key>connections</key>
 	<dict>
 		<key>2F6849DA-7BAF-42CB-8502-EA7F75606985</key>
@@ -320,7 +318,12 @@ esac</string>
 		</dict>
 	</array>
 	<key>readme</key>
-	<string></string>
+	<string>In order to set a default currency, you can set the environment variable `home_currency`.
+
+Valid values are the ISO 4217 currency codes: 
+
+AUD, BGN, BRL, CAD, CHF, CNY, CZK, DKK, EUR, GBP, HKD, HRK, HUF, IDR, ILS, INR, ISK, JPY, 
+KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, TRY, USD, ZAR.</string>
 	<key>uidata</key>
 	<dict>
 		<key>08197387-E06B-422D-9BEB-41E76651D350</key>
@@ -385,7 +388,7 @@ esac</string>
 		<string>home_currency</string>
 	</array>
 	<key>version</key>
-	<string>1.0.0</string>
+	<string>1.0.1</string>
 	<key>webaddress</key>
 	<string>https://github.com/techouse</string>
 </dict>

@@ -30,6 +30,16 @@ Heavily inspired by [deanishe/alfred-convert](https://github.com/deanishe/alfred
 - `conv units` - View a list of all the supported physical units
     - When selecting a certain unit and pressing `<return>` that unit's symbol will get copied to the clipboard.
 
+### Default currency
+
+In order to set a default currency, you can set the environment variable `home_currency`.
+
+![home_currency](home_currency.png)
+
+Valid values are the [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency codes: AUD, BGN, BRL, CAD, CHF, CNY, 
+CZK, DKK, EUR, GBP, HKD, HRK, HUF, IDR, ILS, INR, ISK, JPY, KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, 
+TRY, USD, ZAR.
+
 ### Notes
 
 - All [the reference exchange rates are from the ECB](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html).
