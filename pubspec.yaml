@@ -27,7 +27,7 @@ dependencies:
   recase: ^4.1.0
   stash: ^4.4.1
   stash_file: ^4.4.1
-  timezone: ^0.9.0
+  timezone: ^0.9.1
   units_converter: ^2.1.0
   xml: ^6.2.2
 
