@@ -40,6 +40,8 @@ class Convert {
           final ExchangeRate rate = rates.convert(fromCurrency, toCurrency);
 
           final DecimalIntl convertedValue = DecimalIntl(value * rate.rate);
+          final DecimalIntl invertedValue =
+              DecimalIntl(value * rate.invertedRate);
 
           final File? image = await EmojiDownloader(
             '${toCurrency.flag.runes.map((int cp) => cp.toRadixString(16)).join('-')}.png',
@@ -65,6 +67,15 @@ class Convert {
               path: image != null ? image.absolute.path : 'icon.png',
             ),
             valid: true,
+            mods: {
+              {AlfredItemModKey.alt}: AlfredItemMod(
+                subtitle: '${numberFormat.format(DecimalIntl(value))} '
+                    '${toCurrency.name} ${toCurrency.flag} ≃'
+                    ' ${numberFormat.format(invertedValue)}'
+                    ' ${fromCurrency.name} ${fromCurrency.flag}',
+                valid: true,
+              ),
+            },
           );
         } else {
           return _invalidFormat(
@@ -112,8 +123,8 @@ class Convert {
                 : null;
 
         final Uri wolframAlphaUrl = Uri.https('www.wolframalpha.com', 'input', {
-          'i':
-              '$value ${fromUnit?.symbol ?? fromUnitSymbol} to ${toUnit?.symbol ?? toUnitSymbol}',
+          'i': '$value ${fromUnit?.symbol ?? fromUnitSymbol} to '
+              '${toUnit?.symbol ?? toUnitSymbol}',
         });
 
         return AlfredItem(

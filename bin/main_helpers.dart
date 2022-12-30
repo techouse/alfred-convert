@@ -74,57 +74,62 @@ Future<void> _listCurrencies({Currency homeCurrency = Currency.USD}) async {
       if (currency != homeCurrency) {
         try {
           final ExchangeRate? rate = rates?.convert(currency, homeCurrency);
-          final DecimalIntl convertedValue = DecimalIntl(rate!.rate);
 
-          return AlfredItem(
-            uid: currency.name,
-            title: '${currency.fullName} (${currency.name})',
-            subtitle: '1 ${currency.name} ≃'
-                ' ${numberFormat.format(convertedValue)}'
-                ' ${homeCurrency.name}',
-            arg: currency.name,
-            match: '${currency.fullName} (${currency.name})',
-            text: AlfredItemText(
-              copy: currency.name,
-              largeType: currency.name,
-            ),
-            icon: AlfredItemIcon(
-              path: image != null ? image.absolute.path : 'icon.png',
-            ),
-            valid: true,
-          );
-        } on ArgumentError {
-          return AlfredItem(
-            uid: currency.name,
-            title: '${currency.fullName} (${currency.name})',
-            arg: currency.name,
-            match: '${currency.fullName} (${currency.name})',
-            text: AlfredItemText(
-              copy: currency.name,
-              largeType: currency.name,
-            ),
-            icon: AlfredItemIcon(
-              path: image != null ? image.absolute.path : 'icon.png',
-            ),
-            valid: true,
-          );
+          if (rate != null) {
+            final DecimalIntl convertedValue = DecimalIntl(rate.rate);
+            final DecimalIntl invertedValue = DecimalIntl(rate.invertedRate);
+
+            return AlfredItem(
+              uid: currency.name,
+              title: '${currency.fullName} (${currency.name})',
+              subtitle: '1 ${currency.name} ≃'
+                  ' ${numberFormat.format(convertedValue)}'
+                  ' ${homeCurrency.name}',
+              arg: currency.name,
+              match: '${currency.fullName} (${currency.name})',
+              text: AlfredItemText(
+                copy: currency.name,
+                largeType: currency.name,
+              ),
+              icon: AlfredItemIcon(
+                path: image != null ? image.absolute.path : 'icon.png',
+              ),
+              valid: true,
+              mods: {
+                {AlfredItemModKey.alt}: AlfredItemMod(
+                  subtitle: '1 ${homeCurrency.name} ≃'
+                      ' ${numberFormat.format(invertedValue)}'
+                      ' ${currency.name}',
+                  valid: true,
+                ),
+              },
+            );
+          }
+        } catch (error, stackTrace) {
+          if (_verbose) {
+            log.warning(
+              'Error getting exchange rate for ${currency.name}',
+              error,
+              stackTrace,
+            );
+          }
         }
-      } else {
-        return AlfredItem(
-          uid: currency.name,
-          title: '${currency.fullName} (${currency.name})',
-          arg: currency.name,
-          match: '${currency.fullName} (${currency.name})',
-          text: AlfredItemText(
-            copy: currency.name,
-            largeType: currency.name,
-          ),
-          icon: AlfredItemIcon(
-            path: image != null ? image.absolute.path : 'icon.png',
-          ),
-          valid: true,
-        );
       }
+
+      return AlfredItem(
+        uid: currency.name,
+        title: '${currency.fullName} (${currency.name})',
+        arg: currency.name,
+        match: '${currency.fullName} (${currency.name})',
+        text: AlfredItemText(
+          copy: currency.name,
+          largeType: currency.name,
+        ),
+        icon: AlfredItemIcon(
+          path: image != null ? image.absolute.path : 'icon.png',
+        ),
+        valid: true,
+      );
     }).toList()),
   );
   _workflow.addItems(items.items);
@@ -223,20 +228,12 @@ Future<void> _convert(
     }
   } on ArgumentError catch (error, stackTrace) {
     if (_verbose) {
-      log.severe(
-        error.message,
-        error,
-        stackTrace,
-      );
+      log.severe(error.message, error, stackTrace);
     }
     _invalidFormat('${error.message}: "${error.invalidValue}"');
   } catch (error, stackTrace) {
     if (_verbose) {
-      log.severe(
-        'Error calling _convert',
-        error,
-        stackTrace,
-      );
+      log.severe('Error calling _convert', error, stackTrace);
     }
     _invalidFormat(error.toString());
   }
