@@ -80,7 +80,6 @@ Future<void> _listCurrencies({Currency homeCurrency = Currency.USD}) async {
             final DecimalIntl invertedValue = DecimalIntl(rate.invertedRate);
 
             return AlfredItem(
-              uid: currency.name,
               title: '${currency.fullName} (${currency.name})',
               subtitle: '1 ${currency.name} ≃'
                   ' ${numberFormat.format(convertedValue)}'
@@ -117,7 +116,6 @@ Future<void> _listCurrencies({Currency homeCurrency = Currency.USD}) async {
       }
 
       return AlfredItem(
-        uid: currency.name,
         title: '${currency.fullName} (${currency.name})',
         arg: currency.name,
         match: '${currency.fullName} (${currency.name})',
