@@ -38,9 +38,8 @@ In order to set a default currency, you can set the environment variable `home_c
 
 ![home_currency](home_currency.png)
 
-Valid values are the [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency codes: AUD, BGN, BRL, CAD, CHF, CNY, 
-CZK, DKK, EUR, GBP, HKD, HRK, HUF, IDR, ILS, INR, ISK, JPY, KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, 
-TRY, USD, ZAR.
+Valid values are the [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency codes: AUD, BGN, BRL, CAD, CHF, CNY, CZK, 
+DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, ISK, JPY, KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, TRY, USD, ZAR.
 
 ### Notes
 
