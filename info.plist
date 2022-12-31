@@ -388,7 +388,7 @@ KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, TRY, USD, ZAR.</stri
 		<string>home_currency</string>
 	</array>
 	<key>version</key>
-	<string>1.0.2</string>
+	<string>1.0.3</string>
 	<key>webaddress</key>
 	<string>https://github.com/techouse</string>
 </dict>

@@ -27,8 +27,6 @@ enum Currency {
   GBP('Pound sterling', Emojis.flagUnitedKingdom),
   @JsonValue('HKD')
   HKD('Hong Kong dollar', Emojis.flagHongKongSarChina),
-  @JsonValue('HRK')
-  HRK('Croatian kuna', Emojis.flagCroatia),
   @JsonValue('HUF')
   HUF('Hungarian forint', Emojis.flagHungary),
   @JsonValue('IDR')

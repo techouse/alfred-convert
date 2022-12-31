@@ -72,16 +72,23 @@ class ExchangeRates with EquatableMixin, _$ExchangeRatesAutoequalMixin {
       date: updatedAt,
       rates: [
         ExchangeRate(currency: Currency.EUR, rate: Decimal.one),
-        ...doc.descendantElements
-            .where((XmlElement el) =>
-                el.getAttribute('currency') != null &&
-                el.getAttribute('rate') != null)
-            .map(
-              (XmlElement el) => ExchangeRate(
-                currency: Currency.values.byName(el.getAttribute('currency')!),
-                rate: Decimal.parse(el.getAttribute('rate')!),
-              ),
-            ),
+        ...doc.descendantElements.where((XmlElement el) {
+          if (el.getAttribute('currency') != null &&
+              el.getAttribute('rate') != null) {
+            try {
+              Currency.values.byName(el.getAttribute('currency')!);
+
+              return true;
+            } catch (_) {}
+          }
+
+          return false;
+        }).map(
+          (XmlElement el) => ExchangeRate(
+            currency: Currency.values.byName(el.getAttribute('currency')!),
+            rate: Decimal.parse(el.getAttribute('rate')!),
+          ),
+        ),
       ],
     );
   }

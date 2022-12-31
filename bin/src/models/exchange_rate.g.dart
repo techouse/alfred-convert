@@ -43,7 +43,6 @@ const _$CurrencyEnumMap = {
   Currency.EUR: 'EUR',
   Currency.GBP: 'GBP',
   Currency.HKD: 'HKD',
-  Currency.HRK: 'HRK',
   Currency.HUF: 'HUF',
   Currency.IDR: 'IDR',
   Currency.ILS: 'ILS',
