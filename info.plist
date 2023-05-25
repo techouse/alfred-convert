@@ -99,7 +99,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>arch -x86_64 ./conv -u</string>
+				<string>arch -x86_64 ./workflow -u</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -225,16 +225,16 @@
 				<key>script</key>
 				<string>case "{query}" in
 	"money") 
-		arch -x86_64 ./conv -C
+		arch -x86_64 ./workflow -C
 		;;
 	"units")
-		arch -x86_64 ./conv -U
+		arch -x86_64 ./workflow -U
 		;;
 	"update:workflow")
-		arch -x86_64 ./conv -u
+		arch -x86_64 ./workflow -u
 		;;
 	*)
-		arch -x86_64 ./conv -q "{query}"
+		arch -x86_64 ./workflow -q "{query}"
 		;;
 esac</string>
 				<key>scriptargtype</key>
@@ -388,8 +388,8 @@ KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, TRY, USD, ZAR.</stri
 		<string>home_currency</string>
 	</array>
 	<key>version</key>
-	<string>1.0.3</string>
+	<string></string>
 	<key>webaddress</key>
-	<string>https://github.com/techouse</string>
+	<string></string>
 </dict>
 </plist>
