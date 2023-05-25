@@ -4,7 +4,8 @@ import 'package:http/http.dart' as http show get, Response;
 import 'package:path/path.dart' as path show dirname, join;
 
 class EmojiDownloader {
-  const EmojiDownloader(this.emoji, {
+  const EmojiDownloader(
+    this.emoji, {
     String? directoryPath,
   }) : _directoryPath = directoryPath;
 

@@ -20,7 +20,7 @@ class ExchangeRate with EquatableMixin, _$ExchangeRateAutoequalMixin {
   final Decimal rate;
 
   @ignoreAutoequal
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   Decimal get invertedRate => (Decimal.one / rate).toDecimal();
 
   static _rateFromJson(String rate) => Decimal.fromJson(rate);
