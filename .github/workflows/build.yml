@@ -40,18 +40,11 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
       - name: Configure .env file
         id: generate_env_file
-        env:
-          ALGOLIA_SEARCH_INDEX: ${{ vars.ALGOLIA_SEARCH_INDEX }}
-          ALGOLIA_APPLICATION_ID: ${{ vars.ALGOLIA_APPLICATION_ID }}
-          ALGOLIA_SEARCH_ONLY_API_KEY: ${{ vars.ALGOLIA_SEARCH_ONLY_API_KEY }}
         run: |
           set -e
           mv .env.example .env
           sed -i '' "s#APP_VERSION=.*#APP_VERSION=$VERSION#" .env
           sed -i '' "s#GITHUB_REPOSITORY_URL=.*#GITHUB_REPOSITORY_URL=$GITHUB_REPOSITORY_URL#" .env
-          sed -i '' "s#ALGOLIA_SEARCH_INDEX=.*#ALGOLIA_SEARCH_INDEX=$ALGOLIA_SEARCH_INDEX#" .env
-          sed -i '' "s#ALGOLIA_APPLICATION_ID=.*#ALGOLIA_APPLICATION_ID=$ALGOLIA_APPLICATION_ID#" .env
-          sed -i '' "s#ALGOLIA_SEARCH_ONLY_API_KEY=.*#ALGOLIA_SEARCH_ONLY_API_KEY=$ALGOLIA_SEARCH_ONLY_API_KEY#" .env
       - name: Configure the info.plist
         id: info_plist
         run: |
