@@ -1,3 +1,7 @@
+## 1.0.5
+
+- Remove [dart_code_metrics](https://pub.dev/packages/dart_code_metrics) from dev dependencies as it is being discontinued on 16 July 2023.
+
 ## 1.0.4
 
 - Update workflow to Dart 3
