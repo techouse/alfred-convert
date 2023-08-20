@@ -1,3 +1,12 @@
+## 1.0.6
+
+- [CHORE] update [alfred_workflow](https://pub.dev/packages/alfred_workflow) to 0.4.1 (was 0.4.0)
+- [CHORE] update [collection](https://pub.dev/packages/collection) to 1.18.0 (was 1.17.2)
+- [CHORE] update [copy_with_extension](https://pub.dev/packages/copy_with_extension) to 5.0.4 (was 5.0.3)
+- [CHORE] update [petitparser](https://pub.dev/packages/petitparser) to 6.0.0 (was 5.4.0)
+- [CHORE] update [units_converter](https://pub.dev/packages/units_converter) to 2.1.1 (was 2.1.0)
+- [CHORE] update [xml](https://pub.dev/packages/xml) to 6.4.0 (was 6.3.0)
+
 ## 1.0.5
 
 - Remove [dart_code_metrics](https://pub.dev/packages/dart_code_metrics) from dev dependencies as it is being discontinued on 16 July 2023.

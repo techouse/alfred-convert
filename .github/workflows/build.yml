@@ -38,6 +38,21 @@ jobs:
             exit 1
           fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: Check CHANGELOG.md
+        id: check_changelog
+        run: |
+          set -e
+          if ! grep -q "## ${VERSION}" CHANGELOG.md; then
+            echo "CHANGELOG.md does not contain a section for ${VERSION}"
+            exit 1
+          fi
+      - name: Create tag-specific CHANGELOG
+        id: create_changelog
+        run: |
+          set -e
+          CHANGELOG_PATH=$RUNNER_TEMP/CHANGELOG.md
+          awk '/^##[[:space:]].*/ { if (count == 1) exit; count++; print } count == 1 && !/^##[[:space:]].*/ { print }' CHANGELOG.md | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' > $CHANGELOG_PATH
+          echo "CHANGELOG_PATH=$CHANGELOG_PATH" >> $GITHUB_ENV
       - name: Configure .env file
         id: generate_env_file
         run: |
@@ -162,6 +177,9 @@ jobs:
         id: release_workflow
         uses: softprops/action-gh-release@v1
         with:
+          name: ${{ env.VERSION }}
+          tag_name: v${{ env.VERSION }}
+          body_path: ${{ env.CHANGELOG_PATH }}
           files: ${{ env.artifactPath }}
       - name: Clean up keychain and build directory
         id: clean_up
@@ -171,3 +189,4 @@ jobs:
           rm -rf $RUNNER_TEMP/build_certificate.p12
           rm .env
           rm -rf ./build
+          rm -rf $CHANGELOG_PATH

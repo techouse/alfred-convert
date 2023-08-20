@@ -13,10 +13,10 @@ packages:
     dependency: "direct main"
     description:
       name: alfred_workflow
-      sha256: "540cbc4186d3dc20c3719a60f29b5657aa2b4619107b13403fc3f7378f01bc14"
+      sha256: e3df28313b7bcf98516c6f786119b24a5bf4f619318e5040a206886238b942e3
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.0"
+    version: "0.4.1"
   analyzer:
     dependency: transitive
     description:
@@ -173,10 +173,10 @@ packages:
     dependency: "direct main"
     description:
       name: collection
-      sha256: f092b211a4319e98e5ff58223576de6c2803db36221657b46c82574721240687
+      sha256: ee67cb0715911d28db6bf4af1026078bd6f0128b07a5f66fb2ed94ec6783c09a
       url: "https://pub.dev"
     source: hosted
-    version: "1.17.2"
+    version: "1.18.0"
   convert:
     dependency: transitive
     description:
@@ -189,10 +189,10 @@ packages:
     dependency: transitive
     description:
       name: copy_with_extension
-      sha256: "968ecc772545217d46ce3c8a7512fd71c2694c02d5a2d39c41a1965a1f52e55f"
+      sha256: fbcf890b0c34aedf0894f91a11a579994b61b4e04080204656b582708b5b1125
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.3"
+    version: "5.0.4"
   crypto:
     dependency: transitive
     description:
@@ -413,10 +413,10 @@ packages:
     dependency: transitive
     description:
       name: petitparser
-      sha256: cb3798bef7fc021ac45b308f4b51208a152792445cce0448c9a4ba5879dd8750
+      sha256: "54e61005585962c9cb6f0df05a3ed82453e01deb1b1f83833b0b6cf7eab93da4"
       url: "https://pub.dev"
     source: hosted
-    version: "5.4.0"
+    version: "6.0.0"
   pool:
     dependency: transitive
     description:
@@ -597,10 +597,10 @@ packages:
     dependency: "direct main"
     description:
       name: units_converter
-      sha256: aa702e706f88e1b02e40954df13aa079920210b3ab68047b20822b78fff37ed9
+      sha256: "17d9717f9efacfee14e79cff671e99657fe744d9969629cd9163636f2b11f248"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.1"
   uuid:
     dependency: transitive
     description:
@@ -629,10 +629,10 @@ packages:
     dependency: "direct main"
     description:
       name: xml
-      sha256: "5bc72e1e45e941d825fd7468b9b4cc3b9327942649aeb6fc5cdbf135f0a86e84"
+      sha256: b477e76184eaf1ea0a11ebf4b3d937631693b8ea143c759146c4cd512438442d
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.0"
+    version: "6.4.0"
   yaml:
     dependency: transitive
     description:
@@ -642,4 +642,4 @@ packages:
     source: hosted
     version: "3.1.2"
 sdks:
-  dart: ">=3.0.5 <4.0.0"
+  dart: ">=3.1.0 <4.0.0"
