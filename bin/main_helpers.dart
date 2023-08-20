@@ -6,17 +6,17 @@ final Logger log = Logger('alfred_convert_workflow');
 
 void _logListener(LogRecord record) {
   if (record.error != null && record.stackTrace != null) {
-    print(
+    stdout.write(
       '${record.level.name}: ${record.time}: ${record.message}\n${record.error}\n${record.stackTrace}'
           .trim(),
     );
   } else if (record.error != null) {
-    print(
+    stdout.write(
       '${record.level.name}: ${record.time}: ${record.message}\n${record.error}'
           .trim(),
     );
   } else {
-    print(
+    stdout.write(
       '${record.level.name}: ${record.time}: ${record.message}'.trim(),
     );
   }
