@@ -75,6 +75,13 @@ class Convert {
                     ' ${fromCurrency.name} ${fromCurrency.flag}',
                 valid: true,
               ),
+              {AlfredItemModKey.cmd}: AlfredItemMod(
+                subtitle: 'Copy ${numberFormat.format(convertedValue)}'
+                    ' ${toCurrency.name} ${toCurrency.flag} to clipboard',
+                arg: '${numberFormat.format(convertedValue)}'
+                    ' ${toCurrency.name}',
+                valid: true,
+              ),
             },
           );
         } else {

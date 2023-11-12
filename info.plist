@@ -59,7 +59,19 @@
 			</dict>
 			<dict>
 				<key>destinationuid</key>
-				<string>08197387-E06B-422D-9BEB-41E76651D350</string>
+				<string>207C6354-422F-4E46-8D70-34A3B0D8EC97</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>sourceoutputuid</key>
+				<string>CE9DC55C-ADBF-43C1-ACD4-9AD37038BA47</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>207C6354-422F-4E46-8D70-34A3B0D8EC97</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -117,27 +129,6 @@
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>browser</key>
-				<string></string>
-				<key>skipqueryencode</key>
-				<false/>
-				<key>skipvarencode</key>
-				<false/>
-				<key>spaces</key>
-				<string></string>
-				<key>url</key>
-				<string>{query}</string>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.openurl</string>
-			<key>uid</key>
-			<string>207C6354-422F-4E46-8D70-34A3B0D8EC97</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
 				<key>conditions</key>
 				<array>
 					<dict>
@@ -167,6 +158,20 @@
 						<string>Open Xe.com</string>
 						<key>uid</key>
 						<string>951AA20A-5B2D-4C8A-885A-95BE6660EAD0</string>
+					</dict>
+					<dict>
+						<key>inputstring</key>
+						<string></string>
+						<key>matchcasesensitive</key>
+						<false/>
+						<key>matchmode</key>
+						<integer>4</integer>
+						<key>matchstring</key>
+						<string>^https?:\/\/(www.)?oanda.com\/.*$</string>
+						<key>outputlabel</key>
+						<string>Open Oanda.com</string>
+						<key>uid</key>
+						<string>CE9DC55C-ADBF-43C1-ACD4-9AD37038BA47</string>
 					</dict>
 					<dict>
 						<key>inputstring</key>
@@ -224,7 +229,7 @@
 				<string>Working ...</string>
 				<key>script</key>
 				<string>case "{query}" in
-	"money") 
+	"money")
 		arch -x86_64 ./workflow -C
 		;;
 	"units")
@@ -274,7 +279,7 @@ esac</string>
 			<key>type</key>
 			<string>alfred.workflow.action.openurl</string>
 			<key>uid</key>
-			<string>08197387-E06B-422D-9BEB-41E76651D350</string>
+			<string>207C6354-422F-4E46-8D70-34A3B0D8EC97</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -320,19 +325,12 @@ esac</string>
 	<key>readme</key>
 	<string>In order to set a default currency, you can set the environment variable `home_currency`.
 
-Valid values are the ISO 4217 currency codes: 
+Valid values are the ISO 4217 currency codes:
 
-AUD, BGN, BRL, CAD, CHF, CNY, CZK, DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, ISK, JPY, 
+AUD, BGN, BRL, CAD, CHF, CNY, CZK, DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, ISK, JPY,
 KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, TRY, USD, ZAR.</string>
 	<key>uidata</key>
 	<dict>
-		<key>08197387-E06B-422D-9BEB-41E76651D350</key>
-		<dict>
-			<key>xpos</key>
-			<real>625</real>
-			<key>ypos</key>
-			<real>555</real>
-		</dict>
 		<key>1BBB07BA-11B1-4386-AB63-A9CB78D9A1A9</key>
 		<dict>
 			<key>xpos</key>
@@ -345,7 +343,7 @@ KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, TRY, USD, ZAR.</stri
 			<key>xpos</key>
 			<real>625</real>
 			<key>ypos</key>
-			<real>360</real>
+			<real>475</real>
 		</dict>
 		<key>2F6849DA-7BAF-42CB-8502-EA7F75606985</key>
 		<dict>

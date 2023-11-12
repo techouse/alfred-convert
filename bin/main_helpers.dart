@@ -75,6 +75,11 @@ Future<void> _listCurrencies({Currency homeCurrency = Currency.USD}) async {
         try {
           final ExchangeRate? rate = rates?.convert(currency, homeCurrency);
 
+          final Uri xeUrl = Uri.https('www.xe.com', 'currencycharts', {
+            'from': currency.name,
+            'to': homeCurrency.name,
+          });
+
           if (rate != null) {
             final DecimalIntl convertedValue = DecimalIntl(rate.rate);
             final DecimalIntl invertedValue = DecimalIntl(rate.invertedRate);
@@ -84,7 +89,8 @@ Future<void> _listCurrencies({Currency homeCurrency = Currency.USD}) async {
               subtitle: '1 ${currency.name} ≃'
                   ' ${numberFormat.format(convertedValue)}'
                   ' ${homeCurrency.name}',
-              arg: currency.name,
+              arg: xeUrl.toString(),
+              quickLookUrl: xeUrl.toString(),
               match: '${currency.fullName} (${currency.name})',
               text: AlfredItemText(
                 copy: currency.name,
@@ -101,6 +107,13 @@ Future<void> _listCurrencies({Currency homeCurrency = Currency.USD}) async {
                       ' ${currency.name}',
                   valid: true,
                 ),
+                {AlfredItemModKey.cmd}: AlfredItemMod(
+                  subtitle: 'Copy ${numberFormat.format(convertedValue)}'
+                      ' ${homeCurrency.name} ${homeCurrency.flag} to clipboard',
+                  arg: '${numberFormat.format(convertedValue)} '
+                      '${homeCurrency.name}',
+                  valid: true,
+                ),
               },
             );
           }
@@ -115,9 +128,16 @@ Future<void> _listCurrencies({Currency homeCurrency = Currency.USD}) async {
         }
       }
 
+      final Uri oandaUrl = Uri.https(
+        'www.oanda.com',
+        'currency-converter/en/currencies/majors/${currency.name.toLowerCase()}/',
+      );
+
       return AlfredItem(
         title: '${currency.fullName} (${currency.name})',
-        arg: currency.name,
+        subtitle: 'Open currency fact sheet',
+        arg: oandaUrl.toString(),
+        quickLookUrl: oandaUrl.toString(),
         match: '${currency.fullName} (${currency.name})',
         text: AlfredItemText(
           copy: currency.name,
@@ -127,6 +147,14 @@ Future<void> _listCurrencies({Currency homeCurrency = Currency.USD}) async {
           path: image != null ? image.absolute.path : 'icon.png',
         ),
         valid: true,
+        mods: {
+          {AlfredItemModKey.cmd}: AlfredItemMod(
+            subtitle: 'Copy ${homeCurrency.fullName} (${homeCurrency.name}) '
+                '${homeCurrency.flag} to clipboard',
+            arg: '${homeCurrency.fullName} ${homeCurrency.name}',
+            valid: true,
+          ),
+        },
       );
     }).toList()),
   );
