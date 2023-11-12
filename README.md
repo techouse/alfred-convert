@@ -22,13 +22,13 @@ Heavily inspired by [deanishe/alfred-convert](https://github.com/deanishe/alfred
 - `conv <quantity> <from unit> <to unit>` - Perform a conversion
     - When performing a monetary conversion pressing `⌘Y` or <kbd>return</kbd> (↵) will open the currency-pair chart on [Xe.com](http://www.xe.com).
       - When pressing <kbd>option+return</kbd> (⌥↵) you will get the inverse currency conversion, i.e. `12 USD to EUR` becomes `12 EUR to USD`.
-      - When pressing <kbd>cmd+return</kbd> (⇧↵) you will copy the converted value to your clipboard.
+      - When pressing <kbd>cmd+return</kbd> (⌘↵) you will copy the converted value to your clipboard.
     - When performing a physical unit conversion pressing `⌘Y` or <kbd>return</kbd> (↵) will open up detailed the conversion
       explanation on [WolframAlpha.com](https://www.wolframalpha.com).
 - `conv money` - View a list of all the supported currencies
     - When pressing `⌘Y` or <kbd>return</kbd> (↵) on a certain currency you will be directed to the chart with the home currency on [Xe.com](http://www.xe.com).
       - When pressing <kbd>option+return</kbd> (⌥↵) you will get the inverse currency conversion, i.e. `1 AUD = 0.558 GBP` becomes `1 GBP = 1.792 AUD`.
-      - When pressing <kbd>cmd+return</kbd> (⇧↵) you will copy the equivalent in the home currency to your clipboard.
+      - When pressing <kbd>cmd+return</kbd> (⌘↵) you will copy the equivalent in the home currency to your clipboard.
 - `conv units` - View a list of all the supported physical units
     - When selecting a certain unit and pressing <kbd>return</kbd> (↵) that unit's symbol will get copied to the clipboard.
 
