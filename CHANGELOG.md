@@ -1,3 +1,7 @@
+## 1.1.0
+
+- [FEAT] modify setting the `default_currency` via the Workflow Configuration
+
 ## 1.0.7
 
 - [FEAT] modify the copy to clipboard behaviour for currency related conversions

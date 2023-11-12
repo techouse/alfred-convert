@@ -308,7 +308,7 @@ esac</string>
 				<key>autopaste</key>
 				<true/>
 				<key>clipboardtext</key>
-				<string>{query} </string>
+				<string>{query}</string>
 				<key>ignoredynamicplaceholders</key>
 				<false/>
 				<key>transient</key>
@@ -323,12 +323,24 @@ esac</string>
 		</dict>
 	</array>
 	<key>readme</key>
-	<string>In order to set a default currency, you can set the environment variable `home_currency`.
+	<string>Convert between different units in Alfred.
 
-Valid values are the ISO 4217 currency codes:
+Heavily inspired by [deanishe/alfred-convert](https://github.com/deanishe/alfred-convert) 😊
 
-AUD, BGN, BRL, CAD, CHF, CNY, CZK, DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, ISK, JPY,
-KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, TRY, USD, ZAR.</string>
+## Usage
+
+- `conv &lt;quantity&gt; &lt;from unit&gt; &lt;to unit&gt;` - Perform a conversion
+    - When performing a monetary conversion pressing `⌘Y` or &lt;kbd&gt;return&lt;/kbd&gt; (↵) will open the currency-pair chart on [Xe.com](http://www.xe.com).
+      - When pressing &lt;kbd&gt;option+return&lt;/kbd&gt; (⌥↵) you will get the inverse currency conversion, i.e. `12 USD to EUR` becomes `12 EUR to USD`.
+      - When pressing &lt;kbd&gt;cmd+return&lt;/kbd&gt; (⇧↵) you will copy the converted value to your clipboard.
+    - When performing a physical unit conversion pressing `⌘Y` or &lt;kbd&gt;return&lt;/kbd&gt; (↵) will open up detailed the conversion
+      explanation on [WolframAlpha.com](https://www.wolframalpha.com).
+- `conv money` - View a list of all the supported currencies
+    - When pressing `⌘Y` or &lt;kbd&gt;return&lt;/kbd&gt; (↵) on a certain currency you will be directed to the chart with the home currency on [Xe.com](http://www.xe.com).
+      - When pressing &lt;kbd&gt;option+return&lt;/kbd&gt; (⌥↵) you will get the inverse currency conversion, i.e. `1 AUD = 0.558 GBP` becomes `1 GBP = 1.792 AUD`.
+      - When pressing &lt;kbd&gt;cmd+return&lt;/kbd&gt; (⇧↵) you will copy the equivalent in the home currency to your clipboard.
+- `conv units` - View a list of all the supported physical units
+    - When selecting a certain unit and pressing &lt;kbd&gt;return&lt;/kbd&gt; (↵) that unit's symbol will get copied to the clipboard.</string>
 	<key>uidata</key>
 	<dict>
 		<key>1BBB07BA-11B1-4386-AB63-A9CB78D9A1A9</key>
@@ -348,9 +360,9 @@ KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, TRY, USD, ZAR.</stri
 		<key>2F6849DA-7BAF-42CB-8502-EA7F75606985</key>
 		<dict>
 			<key>xpos</key>
-			<real>130</real>
+			<real>125</real>
 			<key>ypos</key>
-			<real>460</real>
+			<real>475</real>
 		</dict>
 		<key>572C1CAB-814A-4C59-8D8C-04C69F788090</key>
 		<dict>
@@ -375,15 +387,153 @@ KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, TRY, USD, ZAR.</stri
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>
-	<array/>
-	<key>variables</key>
-	<dict>
-		<key>home_currency</key>
-		<string></string>
-	</dict>
-	<key>variablesdontexport</key>
 	<array>
-		<string>home_currency</string>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>USD</string>
+				<key>pairs</key>
+				<array>
+					<array>
+						<string>Australian dollar (AUD)</string>
+						<string>AUD</string>
+					</array>
+					<array>
+						<string>Bulgarian lev (BGN)</string>
+						<string>BGN</string>
+					</array>
+					<array>
+						<string>Brazilian real (BRL)</string>
+						<string>BRL</string>
+					</array>
+					<array>
+						<string>Canadian dollar (CAD)</string>
+						<string>CAD</string>
+					</array>
+					<array>
+						<string>Swiss franc (CHF)</string>
+						<string>CHF</string>
+					</array>
+					<array>
+						<string>Chinese yuan renminbi (CNY)</string>
+						<string>CNY</string>
+					</array>
+					<array>
+						<string>Czech koruna (CZK)</string>
+						<string>CZK</string>
+					</array>
+					<array>
+						<string>Danish krone (DKK)</string>
+						<string>DKK</string>
+					</array>
+					<array>
+						<string>Euro (EUR)</string>
+						<string>EUR</string>
+					</array>
+					<array>
+						<string>Pound sterling (GBP)</string>
+						<string>GBP</string>
+					</array>
+					<array>
+						<string>Hong Kong dollar (HKD)</string>
+						<string>HKD</string>
+					</array>
+					<array>
+						<string>Hungarian forint (HUF)</string>
+						<string>HUF</string>
+					</array>
+					<array>
+						<string>Indonesian rupiah (IDR)</string>
+						<string>IDR</string>
+					</array>
+					<array>
+						<string>Israeli shekel (ILS)</string>
+						<string>ILS</string>
+					</array>
+					<array>
+						<string>Indian rupee (INR)</string>
+						<string>INR</string>
+					</array>
+					<array>
+						<string>Icelandic krona (ISK)</string>
+						<string>ISK</string>
+					</array>
+					<array>
+						<string>Japanese yen (JPY)</string>
+						<string>JPY</string>
+					</array>
+					<array>
+						<string>South Korean won (KRW)</string>
+						<string>KRW</string>
+					</array>
+					<array>
+						<string>Mexican peso (MXN)</string>
+						<string>MXN</string>
+					</array>
+					<array>
+						<string>Malaysian ringgit (MYR)</string>
+						<string>MYR</string>
+					</array>
+					<array>
+						<string>Norwegian krone (NOK)</string>
+						<string>NOK</string>
+					</array>
+					<array>
+						<string>New Zealand dollar (NZD)</string>
+						<string>NZD</string>
+					</array>
+					<array>
+						<string>Philippine peso (PHP)</string>
+						<string>PHP</string>
+					</array>
+					<array>
+						<string>Polish zloty (PLN)</string>
+						<string>PLN</string>
+					</array>
+					<array>
+						<string>Romanian leu (RON)</string>
+						<string>RON</string>
+					</array>
+					<array>
+						<string>Russian rouble (RUB)</string>
+						<string>RUB</string>
+					</array>
+					<array>
+						<string>Swedish krona (SEK)</string>
+						<string>SEK</string>
+					</array>
+					<array>
+						<string>Singapore dollar (SGD)</string>
+						<string>SGD</string>
+					</array>
+					<array>
+						<string>Thai baht (THB)</string>
+						<string>THB</string>
+					</array>
+					<array>
+						<string>Turkish lira (TRY)</string>
+						<string>TRY</string>
+					</array>
+					<array>
+						<string>US dollar (USD)</string>
+						<string>USD</string>
+					</array>
+					<array>
+						<string>South African rand (ZAR)</string>
+						<string>ZAR</string>
+					</array>
+				</array>
+			</dict>
+			<key>description</key>
+			<string></string>
+			<key>label</key>
+			<string>Default currency</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>variable</key>
+			<string>default_currency</string>
+		</dict>
 	</array>
 	<key>version</key>
 	<string></string>

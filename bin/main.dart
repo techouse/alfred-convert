@@ -1,6 +1,6 @@
 // ignore_for_file: long-method
 
-import 'dart:io' show File, Platform, exitCode, stdout;
+import 'dart:io' show File, exitCode, stdout;
 
 import 'package:alfred_workflow/alfred_workflow.dart';
 import 'package:args/args.dart';
@@ -56,8 +56,9 @@ void main(List<String> arguments) {
 
       late final Currency homeCurrency;
       try {
+        final Map? userDefaults = await _workflow.getUserDefaults();
         homeCurrency = Currency.values.byName(
-          (Platform.environment['home_currency'] ?? 'USD').toUpperCase(),
+          (userDefaults?['default_currency'] as String? ?? 'USD').toUpperCase(),
         );
       } on ArgumentError {
         homeCurrency = Currency.USD;
