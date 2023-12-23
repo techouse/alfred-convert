@@ -14,8 +14,8 @@ class EmojiDownloader {
 
   Future<File?> downloadImage() async {
     final String filePath =
-        _directoryPath != null && await Directory(_directoryPath!).exists()
-            ? path.join(_directoryPath!, emoji)
+        _directoryPath != null && await Directory(_directoryPath).exists()
+            ? path.join(_directoryPath, emoji)
             : path.join(
                 path.dirname(Platform.script.toFilePath()),
                 'image_cache',

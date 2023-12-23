@@ -4,37 +4,37 @@ description: Convert between different units with Alfred
 # Prevent accidental publishing to pub.dev.
 publish_to: 'none'
 
-version: 1.1.0
+version: 1.1.1
 
 environment:
-  sdk: '>=3.1.0 <4.0.0'
+  sdk: '>=3.2.0 <4.0.0'
 
 dependencies:
-  alfred_workflow: ^0.5.0
-  autoequal: ^0.5.1
+  alfred_workflow: ^0.5.1
+  autoequal: ^0.7.1
   args: ^2.4.2
   cli_script: ^1.0.0
   collection: ^1.18.0
   decimal: ^2.3.3
   emojis: ^0.9.9
-  envied: ^0.5.1
+  envied: ^0.5.2
   equatable: ^2.0.5
-  http: ^1.1.0
-  intl: ^0.18.1
+  http: ^1.1.2
+  intl: ^0.19.0
   json_annotation: ^4.8.1
   logging: ^1.2.0
-  path: ^1.8.3
+  path: ^1.9.0
   rational: ^2.2.2
   recase: ^4.1.0
-  stash: ^5.0.2
-  stash_file: ^5.0.2
+  stash: ^5.0.3
+  stash_file: ^5.0.3
   timezone: ^0.9.2
   units_converter: ^2.1.1
-  xml: ^6.4.2
+  xml: ^6.5.0
 
 dev_dependencies:
-  autoequal_gen: ^0.5.1
-  build_runner: ^2.4.6
-  envied_generator: ^0.5.1
+  autoequal_gen: ^0.7.1
+  build_runner: ^2.4.7
+  envied_generator: ^0.5.2
   lints: ^3.0.0
   json_serializable: ^6.7.1
