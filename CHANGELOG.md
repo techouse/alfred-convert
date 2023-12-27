@@ -1,3 +1,7 @@
+## 1.1.2
+
+- [CHORE] update [alfred_workflow](https://pub.dev/packages/alfred_workflow) to 0.6.0 (was 0.5.1)
+
 ## 1.1.1
 
 - [CHORE] update [_fe_analyzer_shared](https://pub.dev/packages/_fe_analyzer_shared) to 65.0.0 (was 61.0.0)
