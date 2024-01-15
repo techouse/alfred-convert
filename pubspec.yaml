@@ -33,7 +33,7 @@ dependencies:
   xml: ^6.5.0
 
 dev_dependencies:
-  autoequal_gen: ^0.7.1
+  autoequal_gen: ^0.9.0
   build_runner: ^2.4.7
   envied_generator: ^0.5.2
   lints: ^3.0.0
