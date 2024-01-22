@@ -11,7 +11,7 @@ environment:
 
 dependencies:
   alfred_workflow: ^0.6.0
-  autoequal: ^0.7.1
+  autoequal: ^0.9.1
   args: ^2.4.2
   cli_script: ^1.0.0
   collection: ^1.18.0

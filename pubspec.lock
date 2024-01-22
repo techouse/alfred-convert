@@ -13,10 +13,10 @@ packages:
     dependency: "direct main"
     description:
       name: alfred_workflow
-      sha256: ab87f6d5ab708b73efd3f7fcb5376ade843725920b6d17ac4052a0b147fafc62
+      sha256: "34b02327f124a6bcc306db4d1ed1eeffa7988b8679342471e7a1aae3a8af39fe"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.0"
+    version: "0.6.1"
   analyzer:
     dependency: transitive
     description:
@@ -45,10 +45,10 @@ packages:
     dependency: "direct main"
     description:
       name: autoequal
-      sha256: "321091dcf5bf9492b67d2e7f98cfb5a789dfd63e28d041bd4fe34e319e424cfa"
+      sha256: "186f99b614d8dd5b5756b26b6208d21ab948d7798ecfdf84669fff18eed7aab2"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.1"
+    version: "0.9.1"
   autoequal_gen:
     dependency: "direct dev"
     description:
