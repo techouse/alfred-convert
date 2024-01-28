@@ -13,10 +13,10 @@ import 'exchange_rate.dart';
 
 part 'exchange_rates.g.dart';
 
-@autoequalMixin
+@autoequal
 @JsonSerializable(explicitToJson: true)
 @UtcDateTimeConverter.instance
-class ExchangeRates with EquatableMixin, _$ExchangeRatesAutoequalMixin {
+class ExchangeRates with EquatableMixin {
   const ExchangeRates({
     required this.date,
     required this.rates,
@@ -101,4 +101,7 @@ class ExchangeRates with EquatableMixin, _$ExchangeRatesAutoequalMixin {
       _$ExchangeRatesFromJson(json);
 
   Map<String, dynamic> toJson() => _$ExchangeRatesToJson(this);
+
+  @override
+  List<Object?> get props => _$props;
 }

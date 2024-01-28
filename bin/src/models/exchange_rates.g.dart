@@ -6,14 +6,7 @@ part of 'exchange_rates.dart';
 // AutoequalGenerator
 // **************************************************************************
 
-mixin _$ExchangeRatesAutoequalMixin on EquatableMixin {
-  @override
-  List<Object?> get props =>
-      _$ExchangeRatesAutoequal((this as ExchangeRates))._$props;
-}
-
 extension _$ExchangeRatesAutoequal on ExchangeRates {
-  List<Object?> get _autoequalProps => _$props;
   List<Object?> get _$props => [
         date,
         rates,

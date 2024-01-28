@@ -7,9 +7,9 @@ import 'currency.dart';
 
 part 'exchange_rate.g.dart';
 
-@autoequalMixin
+@autoequal
 @JsonSerializable()
-class ExchangeRate with EquatableMixin, _$ExchangeRateAutoequalMixin {
+class ExchangeRate with EquatableMixin {
   const ExchangeRate({
     required this.currency,
     required this.rate,
@@ -19,7 +19,7 @@ class ExchangeRate with EquatableMixin, _$ExchangeRateAutoequalMixin {
   @JsonKey(fromJson: _rateFromJson, toJson: _rateToJson)
   final Decimal rate;
 
-  @ignoreAutoequal
+  @ignore
   @JsonKey(includeFromJson: false, includeToJson: false)
   Decimal get invertedRate => (Decimal.one / rate).toDecimal();
 
@@ -31,4 +31,7 @@ class ExchangeRate with EquatableMixin, _$ExchangeRateAutoequalMixin {
       _$ExchangeRateFromJson(json);
 
   Map<String, dynamic> toJson() => _$ExchangeRateToJson(this);
+
+  @override
+  List<Object?> get props => _$props;
 }
