@@ -1,3 +1,7 @@
+## 1.1.3
+
+- [CHORE] update dependencies
+
 ## 1.1.2
 
 - [CHORE] update [alfred_workflow](https://pub.dev/packages/alfred_workflow) to 0.6.0 (was 0.5.1)
