@@ -1,3 +1,7 @@
+## 1.2.1
+
+- [CHORE] update dependencies
+
 ## 1.2.0
 
 - [CHORE] compile the binary on both ARM64 and x86_64 architectures to make it run on M1 Macs (arm64) as well
