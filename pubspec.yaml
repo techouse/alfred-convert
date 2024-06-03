@@ -24,7 +24,7 @@ dependencies:
   json_annotation: ^4.9.0
   logging: ^1.2.0
   path: ^1.9.0
-  rational: ^2.2.2
+  rational: ^2.2.3
   recase: ^4.1.0
   stash: ^5.2.0
   stash_file: ^5.2.0
