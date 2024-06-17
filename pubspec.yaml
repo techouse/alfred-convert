@@ -14,7 +14,7 @@ dependencies:
   autoequal: ^0.9.1
   args: ^2.5.0
   cli_script: ^1.0.0
-  collection: ^1.18.0
+  collection: ^1.19.0
   decimal: ^2.3.3
   emojis: ^0.9.9
   envied: ^0.5.4+1
