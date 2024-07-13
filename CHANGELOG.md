@@ -1,3 +1,26 @@
+## 1.2.2
+
+- [CHORE] update Dart SDK to [3.4.0](https://medium.com/dartlang/dart-3-4-bd8d23b4462a) (was 3.2.0)
+- [CHORE] update [_fe_analyzer_shared](https://pub.dev/packages/_fe_analyzer_shared) to 68.0.0 (was 67.0.0) (72.0.0 available)
+- [CHORE] update [analyzer](https://pub.dev/packages/analyzer) to 6.5.0 (was 6.4.1) (6.7.0 available)
+- [CHORE] update [build_daemon](https://pub.dev/packages/build_daemon) to 4.0.2 (was 4.0.1)
+- [CHORE] update [build_runner](https://pub.dev/packages/build_runner) to 2.4.11 (was 2.4.9)
+- [CHORE] update [build_runner_core](https://pub.dev/packages/build_runner_core) to 7.3.1 (was 7.3.0)
+- [CHORE] update [change_case](https://pub.dev/packages/change_case) to 2.1.0 (was 2.0.1)
+- [CHORE] update [collection](https://pub.dev/packages/collection) to 1.19.0 (was 1.18.0)
+- [CHORE] update [decimal](https://pub.dev/packages/decimal) to 3.0.2 (was 2.3.3)
+- [CHORE] update [http_parser](https://pub.dev/packages/http_parser) to 4.1.0 (was 4.0.2)
+- [CHORE] add [macros](https://pub.dev/packages/macros) 0.1.0-main.0 (0.1.2-main.4 available)
+- [CHORE] update [pubspec_parse](https://pub.dev/packages/pubspec_parse) to 1.3.0 (was 1.2.3)
+- [CHORE] update [rational](https://pub.dev/packages/rational) to 2.2.3 (was 2.2.2)
+- [CHORE] update [shelf](https://pub.dev/packages/shelf) to 1.4.2 (was 1.4.1)
+- [CHORE] update [shelf_web_socket](https://pub.dev/packages/shelf_web_socket) to 2.0.0 (was 1.0.4)
+- [CHORE] update [string_scanner](https://pub.dev/packages/string_scanner) to 1.3.0 (was 1.2.0)
+- [CHORE] update [test_api](https://pub.dev/packages/test_api) to 0.7.3 (was 0.7.1)
+- [CHORE] update [uuid](https://pub.dev/packages/uuid) to 4.4.2 (was 4.4.0)
+- [CHORE] add [web_socket](https://pub.dev/packages/web_socket) 0.1.5
+- [CHORE] update [web_socket_channel](https://pub.dev/packages/web_socket_channel) to 3.0.0 (was 2.4.5)
+
 ## 1.2.1
 
 - [CHORE] update dependencies

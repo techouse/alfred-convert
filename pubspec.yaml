@@ -4,18 +4,18 @@ description: Convert between different units with Alfred
 # Prevent accidental publishing to pub.dev.
 publish_to: 'none'
 
-version: 1.2.1
+version: 1.2.2
 
 environment:
-  sdk: ^3.2.0
+  sdk: ^3.4.0
 
 dependencies:
   alfred_workflow: ^1.0.1
   autoequal: ^0.9.1
   args: ^2.5.0
   cli_script: ^1.0.0
-  collection: ^1.18.0
-  decimal: ^2.3.3
+  collection: ^1.19.0
+  decimal: ^3.0.2
   emojis: ^0.9.9
   envied: ^0.5.4+1
   equatable: ^2.0.5
@@ -24,7 +24,7 @@ dependencies:
   json_annotation: ^4.9.0
   logging: ^1.2.0
   path: ^1.9.0
-  rational: ^2.2.2
+  rational: ^2.2.3
   recase: ^4.1.0
   stash: ^5.2.0
   stash_file: ^5.2.0
@@ -34,7 +34,7 @@ dependencies:
 
 dev_dependencies:
   autoequal_gen: ^0.9.1
-  build_runner: ^2.4.9
+  build_runner: ^2.4.11
   envied_generator: ^0.5.4+1
   lints: ^4.0.0
   json_serializable: ^6.8.0

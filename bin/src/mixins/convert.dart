@@ -19,7 +19,7 @@ import '../services/emoji_downloader.dart';
 class Convert {
   Convert._();
 
-  static final NumberFormat numberFormat = NumberFormat();
+  static final DecimalFormatter numberFormat = DecimalFormatter(NumberFormat());
 
   static Future<AlfredItem?> convertCurrency(
     Decimal value,
@@ -39,9 +39,8 @@ class Convert {
         if (toCurrency != null) {
           final ExchangeRate rate = rates.convert(fromCurrency, toCurrency);
 
-          final DecimalIntl convertedValue = DecimalIntl(value * rate.rate);
-          final DecimalIntl invertedValue =
-              DecimalIntl(value * rate.invertedRate);
+          final Decimal convertedValue = value * rate.rate;
+          final Decimal invertedValue = value * rate.invertedRate;
 
           final File? image = await EmojiDownloader(
             '${toCurrency.flag.runes.map((int cp) => cp.toRadixString(16)).join('-')}.png',
@@ -53,7 +52,7 @@ class Convert {
           });
 
           return AlfredItem(
-            title: '${numberFormat.format(DecimalIntl(value))}'
+            title: '${numberFormat.format(value)}'
                 ' ${fromCurrency.name} ${fromCurrency.flag} ≃'
                 ' ${numberFormat.format(convertedValue)}'
                 ' ${toCurrency.name} ${toCurrency.flag}',
@@ -69,7 +68,7 @@ class Convert {
             valid: true,
             mods: {
               {AlfredItemModKey.alt}: AlfredItemMod(
-                subtitle: '${numberFormat.format(DecimalIntl(value))} '
+                subtitle: '${numberFormat.format(value)} '
                     '${toCurrency.name} ${toCurrency.flag} ≃'
                     ' ${numberFormat.format(invertedValue)}'
                     ' ${fromCurrency.name} ${fromCurrency.flag}',
@@ -118,16 +117,10 @@ class Convert {
 
         final Unit? toUnit = fromProperty?.getUnit(to);
 
-        final Decimal? convertedQuantity = toUnit?.value?.toDecimal();
-        final DecimalIntl? convertedQuantityIntl =
-            convertedQuantity != null ? DecimalIntl(convertedQuantity) : null;
-
-        final Decimal? singleConvertedQuantity =
-            1.convertFromTo(from, to)?.toDecimal();
-        final DecimalIntl? singleConvertedQuantityIntl =
-            singleConvertedQuantity != null
-                ? DecimalIntl(singleConvertedQuantity)
-                : null;
+        final Decimal convertedQuantity =
+            toUnit?.value?.toDecimal() ?? Decimal.fromInt(0);
+        final Decimal singleConvertedQuantity =
+            1.convertFromTo(from, to)?.toDecimal() ?? Decimal.fromInt(0);
 
         final Uri wolframAlphaUrl = Uri.https('www.wolframalpha.com', 'input', {
           'i': '$value ${fromUnit?.symbol ?? fromUnitSymbol} to '
@@ -136,11 +129,11 @@ class Convert {
 
         return AlfredItem(
           title:
-              '${numberFormat.format(DecimalIntl(value.toDecimal()))} ${fromUnit?.symbol} ='
-              ' ${numberFormat.format(convertedQuantityIntl)}'
+              '${numberFormat.format(value.toDecimal())} ${fromUnit?.symbol} ='
+              ' ${numberFormat.format(convertedQuantity)}'
               ' ${toUnit?.symbol}',
           subtitle: 'Based on the fact that 1 ${fromUnit?.symbol} ='
-              ' ${numberFormat.format(singleConvertedQuantityIntl)}'
+              ' ${numberFormat.format(singleConvertedQuantity)}'
               ' ${toUnit?.symbol}',
           arg: wolframAlphaUrl.toString(),
           quickLookUrl: wolframAlphaUrl.toString(),

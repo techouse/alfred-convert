@@ -22,7 +22,7 @@ void _logListener(LogRecord record) {
   }
 }
 
-final NumberFormat numberFormat = NumberFormat();
+final DecimalFormatter numberFormat = DecimalFormatter(NumberFormat());
 
 final AlfredWorkflow _workflow = AlfredWorkflow();
 
@@ -81,13 +81,10 @@ Future<void> _listCurrencies({Currency homeCurrency = Currency.USD}) async {
           });
 
           if (rate != null) {
-            final DecimalIntl convertedValue = DecimalIntl(rate.rate);
-            final DecimalIntl invertedValue = DecimalIntl(rate.invertedRate);
-
             return AlfredItem(
               title: '${currency.fullName} (${currency.name})',
               subtitle: '1 ${currency.name} ≃'
-                  ' ${numberFormat.format(convertedValue)}'
+                  ' ${numberFormat.format(rate.rate)}'
                   ' ${homeCurrency.name}',
               arg: xeUrl.toString(),
               quickLookUrl: xeUrl.toString(),
@@ -103,14 +100,14 @@ Future<void> _listCurrencies({Currency homeCurrency = Currency.USD}) async {
               mods: {
                 {AlfredItemModKey.alt}: AlfredItemMod(
                   subtitle: '1 ${homeCurrency.name} ≃'
-                      ' ${numberFormat.format(invertedValue)}'
+                      ' ${numberFormat.format(rate.invertedRate)}'
                       ' ${currency.name}',
                   valid: true,
                 ),
                 {AlfredItemModKey.cmd}: AlfredItemMod(
-                  subtitle: 'Copy ${numberFormat.format(convertedValue)}'
+                  subtitle: 'Copy ${numberFormat.format(rate.rate)}'
                       ' ${homeCurrency.name} ${homeCurrency.flag} to clipboard',
-                  arg: '${numberFormat.format(convertedValue)} '
+                  arg: '${numberFormat.format(rate.rate)} '
                       '${homeCurrency.name}',
                   valid: true,
                 ),
