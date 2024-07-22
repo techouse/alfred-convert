@@ -29,7 +29,7 @@ dependencies:
   stash: ^5.2.0
   stash_file: ^5.2.0
   timezone: ^0.9.4
-  units_converter: ^3.0.0
+  units_converter: ^3.0.1
   xml: ^6.5.0
 
 dev_dependencies:
