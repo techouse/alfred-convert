@@ -34,7 +34,7 @@ dependencies:
 
 dev_dependencies:
   autoequal_gen: ^0.9.1
-  build_runner: ^2.4.11
+  build_runner: ^2.4.13
   envied_generator: ^0.5.4+1
   lints: ^4.0.0
   json_serializable: ^6.8.0
