@@ -7,10 +7,7 @@ part of 'exchange_rate.dart';
 // **************************************************************************
 
 extension _$ExchangeRateAutoequal on ExchangeRate {
-  List<Object?> get _$props => [
-        currency,
-        rate,
-      ];
+  List<Object?> get _$props => [currency, rate];
 }
 
 // **************************************************************************

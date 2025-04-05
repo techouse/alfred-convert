@@ -42,7 +42,8 @@ class ExchangeRates with EquatableMixin {
 
     return ExchangeRate(
       currency: to,
-      rate: (toRate.rate / fromRate.rate).toDecimal(),
+      rate:
+          (toRate.rate / fromRate.rate).toDecimal(scaleOnInfinitePrecision: 4),
     );
   }
 

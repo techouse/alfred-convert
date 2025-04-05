@@ -8,6 +8,7 @@ const Set<Map<String, Enum>> properties = {
   _energy,
   _force,
   _fuelConsumption,
+  _illuminance,
   _length,
   _mass,
   _numeralSystems,
@@ -94,6 +95,7 @@ const Map<String, DIGITAL_DATA> _digitalData = {
 const Map<String, ENERGY> _energy = {
   'J': ENERGY.joules,
   'j': ENERGY.joules,
+  'kJ': ENERGY.kilojoules,
   'cal': ENERGY.calories,
   'kcal': ENERGY.kilocalories,
   'kwh': ENERGY.kilowattHours,
@@ -119,6 +121,11 @@ const Map<String, FUEL_CONSUMPTION> _fuelConsumption = {
   'mpg': FUEL_CONSUMPTION.milesPerImperialGallon,
 };
 
+const Map<String, ILLUMINANCE> _illuminance = {
+  'lx': ILLUMINANCE.lux,
+  'fc': ILLUMINANCE.footCandle,
+};
+
 const Map<String, LENGTH> _length = {
   'm': LENGTH.meters,
   'cm': LENGTH.centimeters,
@@ -137,6 +144,7 @@ const Map<String, LENGTH> _length = {
   'au': LENGTH.astronomicalUnits,
   'ly': LENGTH.lightYears,
   'pc': LENGTH.parsec,
+  'th': LENGTH.mils,
 };
 
 const Map<String, MASS> _mass = {
@@ -184,6 +192,7 @@ const Map<String, PRESSURE> _pressure = {
   'psi': PRESSURE.psi,
   'mmhg': PRESSURE.torr,
   'torr': PRESSURE.torr,
+  'kpa': PRESSURE.kiloPascal,
   'hpa': PRESSURE.hectoPascal,
   'inhg': PRESSURE.inchOfMercury,
 };

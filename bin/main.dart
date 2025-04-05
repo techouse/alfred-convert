@@ -54,7 +54,7 @@ void main(List<String> arguments) {
 
       if (_verbose) Logger.root.onRecord.listen(_logListener);
 
-      final Map<String, AlfredUserConfiguration<AlfredUserConfigurationConfig>>?
+      final Map<String, AlfredUserConfiguration>?
           userDefaults = await _workflow.getUserDefaults();
       final Currency homeCurrency = Currency.values.firstWhere(
         (Currency currency) =>
@@ -76,8 +76,7 @@ void main(List<String> arguments) {
         if (query.isEmpty) {
           _showPlaceholder();
         } else {
-          final AlfredItems? items = await _workflow.getItems();
-          if (items == null || items.items.isEmpty) {
+          if ((await _workflow.getItems()).isEmpty) {
             await _convert(query, homeCurrency: homeCurrency);
           }
         }
