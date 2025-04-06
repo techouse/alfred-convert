@@ -1,6 +1,6 @@
 ## 1.2.3
 
-- [CHORE] update [_](https://pub.dev/packages/_) tofe_analyzer_shared 80.0.0 (was 68.0.0)
+- [CHORE] update [_fe_analyzer_shared](https://pub.dev/packages/_fe_analyzer_shared) tofe_analyzer_shared 80.0.0 (was 68.0.0)
 - [CHORE] update [alfred_workflow](https://pub.dev/packages/alfred_workflow) to 1.1.3 (was 1.0.1)
 - [CHORE] update [analyzer](https://pub.dev/packages/analyzer) to 7.3.0 (was 6.5.0)
 - [CHORE] update [args](https://pub.dev/packages/args) to 2.7.0 (was 2.5.0)
