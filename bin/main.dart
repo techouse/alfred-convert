@@ -54,12 +54,14 @@ void main(List<String> arguments) {
 
       if (_verbose) Logger.root.onRecord.listen(_logListener);
 
-      final Map<String, AlfredUserConfiguration>?
-          userDefaults = await _workflow.getUserDefaults();
+      final Map<String, AlfredUserConfiguration>? userDefaults =
+          await _workflow.getUserDefaults();
+
+      final AlfredUserConfigurationSelect? defaultCurrency =
+          userDefaults?['default_currency'] as AlfredUserConfigurationSelect?;
+
       final Currency homeCurrency = Currency.values.firstWhere(
-        (Currency currency) =>
-            currency.name ==
-            userDefaults?['default_currency']?.config.value as String?,
+        (Currency currency) => currency.name == defaultCurrency?.value,
         orElse: () => Currency.USD,
       );
 
