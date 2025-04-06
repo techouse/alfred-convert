@@ -21,7 +21,8 @@ class ExchangeRate with EquatableMixin {
 
   @ignore
   @JsonKey(includeFromJson: false, includeToJson: false)
-  Decimal get invertedRate => (Decimal.one / rate).toDecimal();
+  Decimal get invertedRate =>
+      (Decimal.one / rate).toDecimal(scaleOnInfinitePrecision: 4);
 
   static _rateFromJson(String rate) => Decimal.fromJson(rate);
 
