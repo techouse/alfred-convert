@@ -621,10 +621,10 @@ packages:
     dependency: "direct main"
     description:
       name: units_converter
-      sha256: "0e0b62a7ac10e6c79942aa52a14225733ce3bc68b70b4d64f99e79fc4477ad6f"
+      sha256: dfb40a9bd0df48701466ae17fd9a763eed3abe9b98b97be1d04a2fecb99673a6
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.2"
+    version: "3.0.3"
   uuid:
     dependency: transitive
     description:
