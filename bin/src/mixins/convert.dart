@@ -26,15 +26,17 @@ class Convert {
     String fromUnitSymbol,
     String toUnitSymbol,
   ) async {
-    final Currency? fromCurrency =
-        Currency.byNameOrNull(fromUnitSymbol.toUpperCase());
+    final Currency? fromCurrency = Currency.byNameOrNull(
+      fromUnitSymbol.toUpperCase(),
+    );
 
     if (fromCurrency != null) {
       final ExchangeRates? rates = await EcbExchangeRates().getLatest();
 
       if (rates != null) {
-        final Currency? toCurrency =
-            Currency.byNameOrNull(toUnitSymbol.toUpperCase());
+        final Currency? toCurrency = Currency.byNameOrNull(
+          toUnitSymbol.toUpperCase(),
+        );
 
         if (toCurrency != null) {
           final ExchangeRate rate = rates.convert(fromCurrency, toCurrency);
@@ -52,14 +54,16 @@ class Convert {
           });
 
           return AlfredItem(
-            title: '${numberFormat.format(value)}'
+            title:
+                '${numberFormat.format(value)}'
                 ' ${fromCurrency.name} ${fromCurrency.flag} ≃'
                 ' ${numberFormat.format(convertedValue)}'
                 ' ${toCurrency.name} ${toCurrency.flag}',
-            subtitle: 'Based on ECB exchange rates from '
-                    '${DateFormat.yMMMd().format(rates.date)} '
-                    '${rates.date.toUtc().hour > 0 && rates.date.toUtc().minute > 0 ? "${DateFormat.Hm().format(rates.date.toUtc())} UTC" : ''}'
-                .trim(),
+            subtitle:
+                'Based on ECB exchange rates from '
+                        '${DateFormat.yMMMd().format(rates.date)} '
+                        '${rates.date.toUtc().hour > 0 && rates.date.toUtc().minute > 0 ? "${DateFormat.Hm().format(rates.date.toUtc())} UTC" : ''}'
+                    .trim(),
             arg: xeUrl.toString(),
             quickLookUrl: xeUrl.toString(),
             icon: AlfredItemIcon(
@@ -68,16 +72,19 @@ class Convert {
             valid: true,
             mods: {
               {AlfredItemModKey.alt}: AlfredItemMod(
-                subtitle: '${numberFormat.format(value)} '
+                subtitle:
+                    '${numberFormat.format(value)} '
                     '${toCurrency.name} ${toCurrency.flag} ≃'
                     ' ${numberFormat.format(invertedValue)}'
                     ' ${fromCurrency.name} ${fromCurrency.flag}',
                 valid: true,
               ),
               {AlfredItemModKey.cmd}: AlfredItemMod(
-                subtitle: 'Copy ${numberFormat.format(convertedValue)}'
+                subtitle:
+                    'Copy ${numberFormat.format(convertedValue)}'
                     ' ${toCurrency.name} ${toCurrency.flag} to clipboard',
-                arg: '${numberFormat.format(convertedValue)}'
+                arg:
+                    '${numberFormat.format(convertedValue)}'
                     ' ${toCurrency.name}',
                 valid: true,
               ),
@@ -123,7 +130,8 @@ class Convert {
             1.convertFromTo(from, to)?.toDecimal() ?? Decimal.fromInt(0);
 
         final Uri wolframAlphaUrl = Uri.https('www.wolframalpha.com', 'input', {
-          'i': '$value ${fromUnit?.symbol ?? fromUnitSymbol} to '
+          'i':
+              '$value ${fromUnit?.symbol ?? fromUnitSymbol} to '
               '${toUnit?.symbol ?? toUnitSymbol}',
         });
 
@@ -132,7 +140,8 @@ class Convert {
               '${numberFormat.format(value.toDecimal())} ${fromUnit?.symbol} ='
               ' ${numberFormat.format(convertedQuantity)}'
               ' ${toUnit?.symbol}',
-          subtitle: 'Based on the fact that 1 ${fromUnit?.symbol} ='
+          subtitle:
+              'Based on the fact that 1 ${fromUnit?.symbol} ='
               ' ${numberFormat.format(singleConvertedQuantity)}'
               ' ${toUnit?.symbol}',
           arg: wolframAlphaUrl.toString(),
@@ -153,8 +162,8 @@ class Convert {
   }
 
   static Enum? _identifyUnit(String unitSymbol) => properties.firstWhereOrNull(
-        (Map<String, Enum> property) => property.containsKey(unitSymbol),
-      )?[unitSymbol];
+    (Map<String, Enum> property) => property.containsKey(unitSymbol),
+  )?[unitSymbol];
 
   static DoubleProperty? getProperty(Enum unit) {
     if (unit is ANGLE) return Angle();
@@ -177,9 +186,9 @@ class Convert {
   }
 
   static AlfredItem _invalidFormat([String? message]) => AlfredItem(
-        title: message ?? 'Invalid format.',
-        subtitle: 'Usage: conv 123.45 gbp usd',
-        icon: AlfredItemIcon(path: 'icon.png'),
-        valid: false,
-      );
+    title: message ?? 'Invalid format.',
+    subtitle: 'Usage: conv 123.45 gbp usd',
+    icon: AlfredItemIcon(path: 'icon.png'),
+    valid: false,
+  );
 }

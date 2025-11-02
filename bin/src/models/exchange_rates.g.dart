@@ -3,10 +3,10 @@
 part of 'exchange_rates.dart';
 
 // **************************************************************************
-// AutoequalGenerator
+// EquatableGenerator
 // **************************************************************************
 
-extension _$ExchangeRatesAutoequal on ExchangeRates {
+extension _$ExchangeRatesEquatableAnnotations on ExchangeRates {
   List<Object?> get _$props => [date, rates];
 }
 

@@ -66,94 +66,98 @@ Future<void> _listCurrencies({Currency homeCurrency = Currency.USD}) async {
   final ExchangeRates? rates = await EcbExchangeRates().getLatest();
 
   final AlfredItems items = AlfredItems(
-    await Future.wait(Currency.values.map((currency) async {
-      final File? image = await EmojiDownloader(
-        '${currency.flag.runes.map((int cp) => cp.toRadixString(16)).join('-')}.png',
-      ).downloadImage();
+    await Future.wait(
+      Currency.values.map((currency) async {
+        final File? image = await EmojiDownloader(
+          '${currency.flag.runes.map((int cp) => cp.toRadixString(16)).join('-')}.png',
+        ).downloadImage();
 
-      if (currency != homeCurrency) {
-        try {
-          final ExchangeRate? rate = rates?.convert(currency, homeCurrency);
+        if (currency != homeCurrency) {
+          try {
+            final ExchangeRate? rate = rates?.convert(currency, homeCurrency);
 
-          final Uri xeUrl = Uri.https('www.xe.com', 'currencycharts', {
-            'from': currency.name,
-            'to': homeCurrency.name,
-          });
+            final Uri xeUrl = Uri.https('www.xe.com', 'currencycharts', {
+              'from': currency.name,
+              'to': homeCurrency.name,
+            });
 
-          if (rate != null) {
-            return AlfredItem(
-              title: '${currency.fullName} (${currency.name})',
-              subtitle: '1 ${currency.name} ≃'
-                  ' ${numberFormat.format(rate.rate)}'
-                  ' ${homeCurrency.name}',
-              arg: xeUrl.toString(),
-              quickLookUrl: xeUrl.toString(),
-              match: '${currency.fullName} (${currency.name})',
-              text: AlfredItemText(
-                copy: currency.name,
-                largeType: currency.name,
-              ),
-              icon: AlfredItemIcon(
-                path: image != null ? image.absolute.path : 'icon.png',
-              ),
-              valid: true,
-              mods: {
-                {AlfredItemModKey.alt}: AlfredItemMod(
-                  subtitle: '1 ${homeCurrency.name} ≃'
-                      ' ${numberFormat.format(rate.invertedRate)}'
-                      ' ${currency.name}',
-                  valid: true,
+            if (rate != null) {
+              return AlfredItem(
+                title: '${currency.fullName} (${currency.name})',
+                subtitle:
+                    '1 ${currency.name} ≃'
+                    ' ${numberFormat.format(rate.rate)}'
+                    ' ${homeCurrency.name}',
+                arg: xeUrl.toString(),
+                quickLookUrl: xeUrl.toString(),
+                match: '${currency.fullName} (${currency.name})',
+                text: AlfredItemText(
+                  copy: currency.name,
+                  largeType: currency.name,
                 ),
-                {AlfredItemModKey.cmd}: AlfredItemMod(
-                  subtitle: 'Copy ${numberFormat.format(rate.rate)}'
-                      ' ${homeCurrency.name} ${homeCurrency.flag} to clipboard',
-                  arg: '${numberFormat.format(rate.rate)} '
-                      '${homeCurrency.name}',
-                  valid: true,
+                icon: AlfredItemIcon(
+                  path: image != null ? image.absolute.path : 'icon.png',
                 ),
-              },
-            );
-          }
-        } catch (error, stackTrace) {
-          if (_verbose) {
-            log.warning(
-              'Error getting exchange rate for ${currency.name}',
-              error,
-              stackTrace,
-            );
+                valid: true,
+                mods: {
+                  {AlfredItemModKey.alt}: AlfredItemMod(
+                    subtitle:
+                        '1 ${homeCurrency.name} ≃'
+                        ' ${numberFormat.format(rate.invertedRate)}'
+                        ' ${currency.name}',
+                    valid: true,
+                  ),
+                  {AlfredItemModKey.cmd}: AlfredItemMod(
+                    subtitle:
+                        'Copy ${numberFormat.format(rate.rate)}'
+                        ' ${homeCurrency.name} ${homeCurrency.flag} to clipboard',
+                    arg:
+                        '${numberFormat.format(rate.rate)} '
+                        '${homeCurrency.name}',
+                    valid: true,
+                  ),
+                },
+              );
+            }
+          } catch (error, stackTrace) {
+            if (_verbose) {
+              log.warning(
+                'Error getting exchange rate for ${currency.name}',
+                error,
+                stackTrace,
+              );
+            }
           }
         }
-      }
 
-      final Uri oandaUrl = Uri.https(
-        'www.oanda.com',
-        'currency-converter/en/currencies/majors/${currency.name.toLowerCase()}/',
-      );
+        final Uri oandaUrl = Uri.https(
+          'www.oanda.com',
+          'currency-converter/en/currencies/majors/${currency.name.toLowerCase()}/',
+        );
 
-      return AlfredItem(
-        title: '${currency.fullName} (${currency.name})',
-        subtitle: 'Open currency fact sheet',
-        arg: oandaUrl.toString(),
-        quickLookUrl: oandaUrl.toString(),
-        match: '${currency.fullName} (${currency.name})',
-        text: AlfredItemText(
-          copy: currency.name,
-          largeType: currency.name,
-        ),
-        icon: AlfredItemIcon(
-          path: image != null ? image.absolute.path : 'icon.png',
-        ),
-        valid: true,
-        mods: {
-          {AlfredItemModKey.cmd}: AlfredItemMod(
-            subtitle: 'Copy ${homeCurrency.fullName} (${homeCurrency.name}) '
-                '${homeCurrency.flag} to clipboard',
-            arg: '${homeCurrency.fullName} ${homeCurrency.name}',
-            valid: true,
+        return AlfredItem(
+          title: '${currency.fullName} (${currency.name})',
+          subtitle: 'Open currency fact sheet',
+          arg: oandaUrl.toString(),
+          quickLookUrl: oandaUrl.toString(),
+          match: '${currency.fullName} (${currency.name})',
+          text: AlfredItemText(copy: currency.name, largeType: currency.name),
+          icon: AlfredItemIcon(
+            path: image != null ? image.absolute.path : 'icon.png',
           ),
-        },
-      );
-    }).toList()),
+          valid: true,
+          mods: {
+            {AlfredItemModKey.cmd}: AlfredItemMod(
+              subtitle:
+                  'Copy ${homeCurrency.fullName} (${homeCurrency.name}) '
+                  '${homeCurrency.flag} to clipboard',
+              arg: '${homeCurrency.fullName} ${homeCurrency.name}',
+              valid: true,
+            ),
+          },
+        );
+      }).toList(),
+    ),
   );
   _workflow.addItems(items.items);
 }
@@ -179,10 +183,7 @@ Future<void> _listUnits() async {
           arg: entry.key,
           match:
               '${entry.value.name.sentenceCase} [${unit?.symbol ?? entry.value.name}]',
-          text: AlfredItemText(
-            copy: entry.key,
-            largeType: entry.key,
-          ),
+          text: AlfredItemText(copy: entry.key, largeType: entry.key),
           icon: AlfredItemIcon(
             path: image != null ? image.absolute.path : 'icon.png',
           ),

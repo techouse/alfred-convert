@@ -1,19 +1,15 @@
-import 'package:autoequal/autoequal.dart';
 import 'package:decimal/decimal.dart';
 import 'package:equatable/equatable.dart' show EquatableMixin;
+import 'package:equatable_annotations/equatable_annotations.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'currency.dart';
 
 part 'exchange_rate.g.dart';
 
-@autoequal
 @JsonSerializable()
 class ExchangeRate with EquatableMixin {
-  const ExchangeRate({
-    required this.currency,
-    required this.rate,
-  });
+  const ExchangeRate({required this.currency, required this.rate});
 
   final Currency currency;
   @JsonKey(fromJson: _rateFromJson, toJson: _rateToJson)
@@ -24,9 +20,9 @@ class ExchangeRate with EquatableMixin {
   Decimal get invertedRate =>
       (Decimal.one / rate).toDecimal(scaleOnInfinitePrecision: 4);
 
-  static _rateFromJson(String rate) => Decimal.fromJson(rate);
+  static Decimal _rateFromJson(String rate) => Decimal.fromJson(rate);
 
-  static _rateToJson(Decimal rate) => rate.toJson();
+  static String _rateToJson(Decimal rate) => rate.toJson();
 
   factory ExchangeRate.fromJson(Map<String, dynamic> json) =>
       _$ExchangeRateFromJson(json);

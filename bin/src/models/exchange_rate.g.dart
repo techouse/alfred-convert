@@ -3,10 +3,10 @@
 part of 'exchange_rate.dart';
 
 // **************************************************************************
-// AutoequalGenerator
+// EquatableGenerator
 // **************************************************************************
 
-extension _$ExchangeRateAutoequal on ExchangeRate {
+extension _$ExchangeRateEquatableAnnotations on ExchangeRate {
   List<Object?> get _$props => [currency, rate];
 }
 
@@ -15,9 +15,9 @@ extension _$ExchangeRateAutoequal on ExchangeRate {
 // **************************************************************************
 
 ExchangeRate _$ExchangeRateFromJson(Map<String, dynamic> json) => ExchangeRate(
-      currency: $enumDecode(_$CurrencyEnumMap, json['currency']),
-      rate: ExchangeRate._rateFromJson(json['rate'] as String),
-    );
+  currency: $enumDecode(_$CurrencyEnumMap, json['currency']),
+  rate: ExchangeRate._rateFromJson(json['rate'] as String),
+);
 
 Map<String, dynamic> _$ExchangeRateToJson(ExchangeRate instance) =>
     <String, dynamic>{

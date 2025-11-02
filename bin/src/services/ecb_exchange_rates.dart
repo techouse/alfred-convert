@@ -51,11 +51,7 @@ class EcbExchangeRates with Rfc822 {
   ];
 
   final DateTime _now = DateTime.now().toUtc();
-  late final DateTime _today = DateTime.utc(
-    _now.year,
-    _now.month,
-    _now.day,
-  );
+  late final DateTime _today = DateTime.utc(_now.year, _now.month, _now.day);
 
   late final AlfredCache<ExchangeRates> _cache = AlfredCache<ExchangeRates>(
     fromEncodable: (Map<String, dynamic> json) => ExchangeRates.fromJson(json),
@@ -106,12 +102,13 @@ class EcbExchangeRates with Rfc822 {
     tz.initializeTimeZones();
 
     final tz.Location brusselsTimeZone = tz.getLocation('Europe/Brussels');
-    late final DateTime brusselsNow =
-        tz.TZDateTime.from(_now, brusselsTimeZone);
+    late final DateTime brusselsNow = tz.TZDateTime.from(
+      _now,
+      brusselsTimeZone,
+    );
 
     return brusselsNow.weekday != DateTime.saturday &&
         brusselsNow.weekday != DateTime.sunday &&
-
         /// check that it's not a public holiday
         !_holidays.any((String date) {
           final DateTime holiday = tz.TZDateTime.from(
@@ -123,35 +120,40 @@ class EcbExchangeRates with Rfc822 {
               brusselsNow.month == holiday.month &&
               brusselsNow.day == holiday.day;
         }) &&
-
         /// check that it's not Good Friday or Easter Monday
         !_easters
-            .where((String easter) =>
-                tz.TZDateTime.from(
-                  DateTime.parse('${easter}T00:00:00Z'),
-                  brusselsTimeZone,
-                ).year >=
-                brusselsNow.year)
-            .any((String easter) => <DateTime>[
+            .where(
+              (String easter) =>
                   tz.TZDateTime.from(
-                    // Good Friday
-                    DateTime.parse('${easter}T00:00:00Z').subtract(
-                      Duration(days: 2),
-                    ),
+                    DateTime.parse('${easter}T00:00:00Z'),
                     brusselsTimeZone,
-                  ),
-                  tz.TZDateTime.from(
-                    // Easter Monday
-                    DateTime.parse('${easter}T00:00:00Z').add(
-                      Duration(days: 1),
+                  ).year >=
+                  brusselsNow.year,
+            )
+            .any(
+              (String easter) =>
+                  <DateTime>[
+                    tz.TZDateTime.from(
+                      // Good Friday
+                      DateTime.parse(
+                        '${easter}T00:00:00Z',
+                      ).subtract(Duration(days: 2)),
+                      brusselsTimeZone,
                     ),
-                    brusselsTimeZone,
+                    tz.TZDateTime.from(
+                      // Easter Monday
+                      DateTime.parse(
+                        '${easter}T00:00:00Z',
+                      ).add(Duration(days: 1)),
+                      brusselsTimeZone,
+                    ),
+                  ].any(
+                    (DateTime holiday) =>
+                        brusselsNow.year == holiday.year &&
+                        brusselsNow.month == holiday.month &&
+                        brusselsNow.day == holiday.day,
                   ),
-                ].any((DateTime holiday) =>
-                    brusselsNow.year == holiday.year &&
-                    brusselsNow.month == holiday.month &&
-                    brusselsNow.day == holiday.day)) &&
-
+            ) &&
         /// check if it's after 16:00
         (brusselsNow.hour > 16 ||
             (brusselsNow.hour == 16 && brusselsNow.minute > 0));
@@ -159,10 +161,7 @@ class EcbExchangeRates with Rfc822 {
 
   static Future<ExchangeRates?> _downloadLatest() async {
     final http.Response response = await http.get(
-      Uri.https(
-        'www.ecb.europa.eu',
-        '/stats/eurofxref/eurofxref-daily.xml',
-      ),
+      Uri.https('www.ecb.europa.eu', '/stats/eurofxref/eurofxref-daily.xml'),
     );
 
     if (response.statusCode < 400) {

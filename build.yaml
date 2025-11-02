@@ -1,0 +1,10 @@
+targets:
+  $default:
+    builders:
+      equatable_gen:
+        enabled: true
+        options:
+          auto_include: true
+      json_serializable:
+        options:
+          field_rename: snake

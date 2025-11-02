@@ -54,8 +54,8 @@ void main(List<String> arguments) {
 
       if (_verbose) Logger.root.onRecord.listen(_logListener);
 
-      final Map<String, AlfredUserConfiguration>? userDefaults =
-          await _workflow.getUserDefaults();
+      final Map<String, AlfredUserConfiguration>? userDefaults = await _workflow
+          .getUserDefaults();
 
       final AlfredUserConfigurationSelect? defaultCurrency =
           userDefaults?['default_currency'] as AlfredUserConfigurationSelect?;
@@ -70,8 +70,9 @@ void main(List<String> arguments) {
       } else if (args['units']) {
         await _listUnits();
       } else {
-        final String query =
-            args['query'].replaceAll(RegExp(r'\s+'), ' ').trim();
+        final String query = args['query']
+            .replaceAll(RegExp(r'\s+'), ' ')
+            .trim();
 
         if (_verbose) log.info('Query: "$query"');
 

@@ -32,8 +32,6 @@ mixin Rfc822 {
 
     final String splitTime = splits[4], splitZone = splits[5];
 
-    return DateTime.tryParse(
-      '$year-$month-$day $splitTime $splitZone',
-    );
+    return DateTime.tryParse('$year-$month-$day $splitTime $splitZone');
   }
 }

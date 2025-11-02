@@ -1,4 +1,3 @@
-import 'package:autoequal/autoequal.dart';
 import 'package:collection/collection.dart';
 import 'package:decimal/decimal.dart';
 import 'package:equatable/equatable.dart' show EquatableMixin;
@@ -13,14 +12,10 @@ import 'exchange_rate.dart';
 
 part 'exchange_rates.g.dart';
 
-@autoequal
 @JsonSerializable(explicitToJson: true)
 @UtcDateTimeConverter.instance
 class ExchangeRates with EquatableMixin {
-  const ExchangeRates({
-    required this.date,
-    required this.rates,
-  });
+  const ExchangeRates({required this.date, required this.rates});
 
   final DateTime date;
 
@@ -28,22 +23,25 @@ class ExchangeRates with EquatableMixin {
   final List<ExchangeRate> rates;
 
   ExchangeRate convert(Currency from, Currency to) {
-    final ExchangeRate? fromRate =
-        rates.firstWhereOrNull((rate) => rate.currency == from);
+    final ExchangeRate? fromRate = rates.firstWhereOrNull(
+      (rate) => rate.currency == from,
+    );
     if (fromRate == null) {
       throw ArgumentError.value(from, 'from', 'Invalid from currency pair.');
     }
 
-    final ExchangeRate? toRate =
-        rates.firstWhereOrNull((rate) => rate.currency == to);
+    final ExchangeRate? toRate = rates.firstWhereOrNull(
+      (rate) => rate.currency == to,
+    );
     if (toRate == null) {
       throw ArgumentError.value(to, 'to', 'Invalid to currency pair.');
     }
 
     return ExchangeRate(
       currency: to,
-      rate:
-          (toRate.rate / fromRate.rate).toDecimal(scaleOnInfinitePrecision: 4),
+      rate: (toRate.rate / fromRate.rate).toDecimal(
+        scaleOnInfinitePrecision: 4,
+      ),
     );
   }
 
@@ -73,23 +71,25 @@ class ExchangeRates with EquatableMixin {
       date: updatedAt,
       rates: [
         ExchangeRate(currency: Currency.EUR, rate: Decimal.one),
-        ...doc.descendantElements.where((XmlElement el) {
-          if (el.getAttribute('currency') != null &&
-              el.getAttribute('rate') != null) {
-            try {
-              Currency.values.byName(el.getAttribute('currency')!);
+        ...doc.descendantElements
+            .where((XmlElement el) {
+              if (el.getAttribute('currency') != null &&
+                  el.getAttribute('rate') != null) {
+                try {
+                  Currency.values.byName(el.getAttribute('currency')!);
 
-              return true;
-            } catch (_) {}
-          }
+                  return true;
+                } catch (_) {}
+              }
 
-          return false;
-        }).map(
-          (XmlElement el) => ExchangeRate(
-            currency: Currency.values.byName(el.getAttribute('currency')!),
-            rate: Decimal.parse(el.getAttribute('rate')!),
-          ),
-        ),
+              return false;
+            })
+            .map(
+              (XmlElement el) => ExchangeRate(
+                currency: Currency.values.byName(el.getAttribute('currency')!),
+                rate: Decimal.parse(el.getAttribute('rate')!),
+              ),
+            ),
       ],
     );
   }
