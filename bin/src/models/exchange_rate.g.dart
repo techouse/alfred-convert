@@ -27,7 +27,6 @@ Map<String, dynamic> _$ExchangeRateToJson(ExchangeRate instance) =>
 
 const _$CurrencyEnumMap = {
   Currency.AUD: 'AUD',
-  Currency.BGN: 'BGN',
   Currency.BRL: 'BRL',
   Currency.CAD: 'CAD',
   Currency.CHF: 'CHF',

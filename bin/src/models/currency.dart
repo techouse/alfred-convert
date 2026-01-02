@@ -7,8 +7,6 @@ import 'package:json_annotation/json_annotation.dart';
 enum Currency {
   @JsonValue('AUD')
   AUD('Australian dollar', Emojis.flagAustralia),
-  @JsonValue('BGN')
-  BGN('Bulgarian lev', Emojis.flagBulgaria),
   @JsonValue('BRL')
   BRL('Brazilian real', Emojis.flagBrazil),
   @JsonValue('CAD')

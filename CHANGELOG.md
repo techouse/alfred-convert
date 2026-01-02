@@ -1,3 +1,7 @@
+## 1.2.5
+
+- Remove the Bulgarian lev (BGN) from the list of supported currencies as Bulgaria starts using the Euro on 1 January 2026.
+
 ## 1.2.4
 
 - [CHORE] update [_](https://pub.dev/packages/_) tofe_analyzer_shared 91.0.0 (was 80.0.0) (92.0.0 available)

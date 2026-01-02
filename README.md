@@ -38,7 +38,7 @@ In order to set a default currency, you can set it in the Workflow Configuration
 
 ![default_currency](default_currency.png)
 
-Valid values are the [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency codes: AUD, BGN, BRL, CAD, CHF, CNY, CZK, 
+Valid values are the [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency codes: AUD, BRL, CAD, CHF, CNY, CZK, 
 DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, ISK, JPY, KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, TRY, USD, ZAR.
 
 ### Notes
