@@ -1,3 +1,7 @@
+## 1.2.6
+
+- [FIX] update broken alfred_workflow dependency
+
 ## 1.2.5
 
 - Remove the Bulgarian lev (BGN) from the list of supported currencies as Bulgaria starts using the Euro on 1 January 2026.

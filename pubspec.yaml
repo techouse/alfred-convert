@@ -4,13 +4,13 @@ description: Convert between different units with Alfred
 # Prevent accidental publishing to pub.dev.
 publish_to: 'none'
 
-version: 1.2.5
+version: 1.2.6
 
 environment:
   sdk: ^3.9.0
 
 dependencies:
-  alfred_workflow: ^1.2.1
+  alfred_workflow: ^1.2.2
   args: ^2.7.0
   cli_script: ^1.0.0
   collection: ^1.19.1

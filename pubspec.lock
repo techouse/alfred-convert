@@ -13,10 +13,10 @@ packages:
     dependency: "direct main"
     description:
       name: alfred_workflow
-      sha256: "68bcf4733924f374bff4e2a64bbb1e7510b580e08708f815b4ccac6b4088171f"
+      sha256: b2cde6fcc607fa8e5bf1ff0af6f7bfb66539f17d7025d87cb614aecaad3a91a1
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.1"
+    version: "1.2.2"
   analyzer:
     dependency: transitive
     description:
