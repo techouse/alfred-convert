@@ -77,13 +77,32 @@ jobs:
           pushd arm64
           find . -not -path "./*_cache*" -exec zip --symlinks "../${WORKFLOW_NAME}-v${VERSION}.alfredworkflow" {} +
           popd
+      - name: Check CHANGELOG.md
+        id: check_changelog
+        run: |
+          set -e
+          if ! grep -q "## $VERSION" CHANGELOG.md; then
+            echo "CHANGELOG.md does not contain a section for $VERSION"
+            exit 1
+          fi
+      - name: Create tag-specific CHANGELOG
+        id: create_changelog
+        run: |
+          set -e
+          CHANGELOG_PATH=$RUNNER_TEMP/CHANGELOG.md
+          awk '/^##[[:space:]].*/ { if (count == 1) exit; count++; print } count == 1 && !/^##[[:space:]].*/ { print }' CHANGELOG.md | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' > $CHANGELOG_PATH
+          echo "CHANGELOG_PATH=$CHANGELOG_PATH" >> $GITHUB_ENV
       - name: Release
         id: release_workflow
         env:
           WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ runner.temp }}/download/${{ env.WORKFLOW_NAME }}-v${{ env.VERSION }}.alfredworkflow
+          name: ${{ env.VERSION }}
+          tag_name: v${{ env.VERSION }}
+          body_path: ${{ env.CHANGELOG_PATH }}
+          files: |
+            ${{ runner.temp }}/download/${{ env.WORKFLOW_NAME }}-v${{ env.VERSION }}.alfredworkflow
       - name: Clean up keychain and build directory
         id: clean_up
         if: ${{ always() }}
