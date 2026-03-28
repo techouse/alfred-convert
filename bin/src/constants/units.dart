@@ -103,6 +103,8 @@ const Map<String, ENERGY> _energy = {
   'ev': ENERGY.electronvolts,
   'ft⋅lbf': ENERGY.energyFootPound,
   'ftlbf': ENERGY.energyFootPound,
+  'Wh': ENERGY.wattHours,
+  'BTU': ENERGY.britishThermalUnit,
 };
 
 const Map<String, FORCE> _force = {
@@ -153,7 +155,7 @@ const Map<String, MASS> _mass = {
   'kg': MASS.kilograms,
   'lb': MASS.pounds,
   'oz': MASS.ounces,
-  't': MASS.tons,
+  't': MASS.tonnes,
   'mg': MASS.milligrams,
   'u': MASS.uma,
   'ct': MASS.carats,
@@ -195,6 +197,9 @@ const Map<String, PRESSURE> _pressure = {
   'kpa': PRESSURE.kiloPascal,
   'hpa': PRESSURE.hectoPascal,
   'inhg': PRESSURE.inchOfMercury,
+  'ksi': PRESSURE.ksi,
+  'MPa': PRESSURE.megaPascal,
+  'GPa': PRESSURE.gigaPascal,
 };
 
 const Map<String, SPEED> _speed = {
@@ -206,6 +211,8 @@ const Map<String, SPEED> _speed = {
   'kts': SPEED.knots,
   'ft/s': SPEED.feetsPerSecond,
   'min/km': SPEED.minutesPerKilometer,
+  'min/mi': SPEED.minutesPerMile,
+  'c': SPEED.speedOfLight,
 };
 
 const Map<String, TEMPERATURE> _temperature = {
@@ -249,6 +256,7 @@ const Map<String, TORQUE> _torque = {
   'kgfm': TORQUE.kilogramForceMeter,
   'pdl·m': TORQUE.poundalMeter,
   'pdlm': TORQUE.poundalMeter,
+  'lbf·in': TORQUE.poundForceInch,
 };
 
 const Map<String, VOLUME> _volume = {
@@ -270,4 +278,13 @@ const Map<String, VOLUME> _volume = {
   'floz': VOLUME.imperialFluidOunces,
   'us.fl.oz': VOLUME.usFluidOunces,
   'us.floz': VOLUME.usFluidOunces,
+  'US. liq. gi': VOLUME.usGill,
+  'US. liq. qt': VOLUME.usQuarts,
+  'fl': VOLUME.femtoliters,
+  'pl': VOLUME.picoliters,
+  'nl': VOLUME.nanoliters,
+  'µl': VOLUME.microliters,
+  'dl': VOLUME.deciliters,
+  'cl': VOLUME.centiliters,
+  'tsp.': VOLUME.teaspoonsMetric,
 };
