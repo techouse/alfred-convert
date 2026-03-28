@@ -1,3 +1,7 @@
+## 1.2.7
+
+- [FEAT] add new unit conversions for energy, mass, pressure, speed, temperature, torque, and volume
+
 ## 1.2.6
 
 - [FIX] update broken alfred_workflow dependency

@@ -4,7 +4,7 @@ description: Convert between different units with Alfred
 # Prevent accidental publishing to pub.dev.
 publish_to: 'none'
 
-version: 1.2.6
+version: 1.2.7
 
 environment:
   sdk: ^3.10.0
