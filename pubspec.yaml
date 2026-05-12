@@ -16,7 +16,7 @@ dependencies:
   collection: ^1.19.1
   decimal: ^3.2.4
   emojis: ^0.9.9
-  envied: ^1.3.4
+  envied: ^1.3.5
   equatable: ^2.0.8
   equatable_annotations: ^1.3.0
   http: ^1.6.0
