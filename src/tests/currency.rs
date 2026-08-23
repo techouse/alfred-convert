@@ -3,7 +3,13 @@ use std::collections::BTreeMap;
 use jiff::Timestamp;
 use rust_decimal::Decimal;
 
-use super::{Currency, ExchangeRates, divide_like_dart};
+use super::{CURRENCIES, Currency, ExchangeRates, divide_like_dart};
+
+#[test]
+fn discontinued_russian_rouble_should_not_be_supported() {
+    assert!(Currency::from_code("RUB").is_none());
+    assert!(CURRENCIES.iter().all(|currency| currency.code() != "RUB"));
+}
 
 #[test]
 fn divide_should_keep_finite_precision_and_truncate_repeating_values() -> anyhow::Result<()> {

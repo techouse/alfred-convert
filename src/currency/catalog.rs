@@ -41,8 +41,8 @@ impl Currency {
     }
 }
 
-/// Currencies retained in the Dart workflow's stable display order.
-pub const CURRENCIES: [Currency; 31] = [
+/// Currencies retained in the workflow's stable display order.
+pub const CURRENCIES: [Currency; 30] = [
     Currency::new("AUD", "Australian dollar", "🇦🇺"),
     Currency::new("BRL", "Brazilian real", "🇧🇷"),
     Currency::new("CAD", "Canadian dollar", "🇨🇦"),
@@ -67,7 +67,6 @@ pub const CURRENCIES: [Currency; 31] = [
     Currency::new("PHP", "Philippine peso", "🇵🇭"),
     Currency::new("PLN", "Polish zloty", "🇵🇱"),
     Currency::new("RON", "Romanian leu", "🇷🇴"),
-    Currency::new("RUB", "Russian rouble", "🇷🇺"),
     Currency::new("SEK", "Swedish krona", "🇸🇪"),
     Currency::new("SGD", "Singapore dollar", "🇸🇬"),
     Currency::new("THB", "Thai baht", "🇹🇭"),

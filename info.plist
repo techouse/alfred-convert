@@ -490,10 +490,6 @@ The Default customary units preference selects Imperial (UK) or US customary def
 						<string>RON</string>
 					</array>
 					<array>
-						<string>Russian rouble (RUB)</string>
-						<string>RUB</string>
-					</array>
-					<array>
 						<string>Swedish krona (SEK)</string>
 						<string>SEK</string>
 					</array>

@@ -76,6 +76,18 @@ fn successful_response_should_parse_supported_rates_and_cache_them() -> anyhow::
 }
 
 #[test]
+fn discontinued_russian_rouble_should_be_ignored_in_ecb_xml() -> anyhow::Result<()> {
+    let xml = r#"<?xml version="1.0"?><Envelope><Cube><Cube time="2026-08-21"><Cube currency="RUB" rate="94.1234"/><Cube currency="USD" rate="1.1732"/></Cube></Cube></Envelope>"#;
+    let rates = parse_exchange_rates(xml, None, "2026-08-21T17:00:00Z".parse()?)?;
+    assert_eq!(rates.rates.get("RUB"), None);
+    assert_eq!(
+        rates.rates.get("USD"),
+        Some(&rust_decimal::Decimal::new(11_732, 4))
+    );
+    Ok(())
+}
+
+#[test]
 fn xml_source_date_should_remain_on_the_same_utc_day() -> anyhow::Result<()> {
     let xml = r#"<?xml version="1.0"?><Envelope><Cube><Cube time="2026-08-21"><Cube currency="USD" rate="1.1732"/></Cube></Cube></Envelope>"#;
     let now = "2026-08-21T17:00:00Z".parse::<Timestamp>()?;

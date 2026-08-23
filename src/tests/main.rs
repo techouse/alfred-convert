@@ -145,6 +145,15 @@ fn workflow_settings_should_load_all_select_preferences() -> anyhow::Result<()> 
 }
 
 #[test]
+fn workflow_settings_should_fall_back_when_rub_is_saved_as_default_currency() -> anyhow::Result<()>
+{
+    let defaults = BTreeMap::from([select_configuration("default_currency", "RUB")]);
+    let settings = workflow_settings_from_defaults(&defaults)?;
+    assert_eq!(settings.home_currency.code(), "USD");
+    Ok(())
+}
+
+#[test]
 fn workflow_settings_should_fall_back_for_wrong_action_configuration_type() -> anyhow::Result<()> {
     let defaults = BTreeMap::from([
         select_configuration("default_currency", "USD"),
