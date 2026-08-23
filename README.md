@@ -47,6 +47,20 @@ DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, ISK, JPY, KRW, MXN, MYR, NOK, NZD, PHP, 
   The reference rates are usually updated around 16:00 CET on every working day, except
   on [TARGET closing days](https://www.ecb.europa.eu/home/contacts/working-hours/html/index.en.html).
 
-- All non-monetary conversions performed using [ferraridamiano/units_converter](https://github.com/ferraridamiano/units_converter). 
+- Non-monetary conversions are evaluated by [Numbat](https://numbat.dev/). Native Numbat expressions such as `2in to cm`, arithmetic, constants, and compound units are supported alongside the workflow's historical shorthand.
 
 - The displayed emoji images are from [joypixels/emoji-assets](https://github.com/joypixels/emoji-assets).
+
+## Development
+
+The workflow is an unpublished Rust 2024 crate and requires Rust 1.88 or newer.
+Install the locked license generator before running the full local checks:
+
+```shell
+cargo install cargo-about --locked --features cli
+make ci
+```
+
+`make build-release` creates a native development build. `make package` builds
+both Apple Silicon and Intel slices and creates a universal `.alfredworkflow`
+archive under `build/`.
