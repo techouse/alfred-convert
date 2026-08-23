@@ -336,7 +336,9 @@ Heavily inspired by [deanishe/alfred-convert](https://github.com/deanishe/alfred
       - &lt;kbd&gt;option+return&lt;/kbd&gt; (⌥↵) shows the inverse rate and copies it when Copy to clipboard is the default.
       - Quick Look (`⌘Y`) always opens the Xe chart.
 - `conv units` - View a list of all the supported physical units
-    - When selecting a certain unit and pressing &lt;kbd&gt;return&lt;/kbd&gt; (↵) that unit's symbol will get copied to the clipboard.</string>
+    - When selecting a certain unit and pressing &lt;kbd&gt;return&lt;/kbd&gt; (↵) that unit's symbol will get copied to the clipboard.
+
+The Default customary units preference selects Imperial (UK) or US customary definitions for ambiguous historical shorthand: `gal`, `pt`, `fl.oz`/`floz`, `tbsp.`, `tsp.`, and `mpg`. Explicit `us.*` aliases and native Numbat unit names override the preference; `cup` remains US customary. For cross-system conversions, use lowercase `uk_`/`us_` aliases (short or long forms) for gallons, quarts, pints, gills, fluid ounces, fluid drachms/drams, tablespoons, teaspoons, and miles per gallon. For example, `conv 1 uk_floz to us_floz` gives `1 UK fl oz = 0.961 US fl oz`; these explicit aliases ignore the preference.</string>
 	<key>uidata</key>
 	<dict>
 		<key>1BBB07BA-11B1-4386-AB63-A9CB78D9A1A9</key>
@@ -525,6 +527,32 @@ Heavily inspired by [deanishe/alfred-convert](https://github.com/deanishe/alfred
 			<string>popupbutton</string>
 			<key>variable</key>
 			<string>default_currency</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>imperial</string>
+				<key>pairs</key>
+				<array>
+					<array>
+						<string>Imperial (UK)</string>
+						<string>imperial</string>
+					</array>
+					<array>
+						<string>US customary</string>
+						<string>us_customary</string>
+					</array>
+				</array>
+			</dict>
+			<key>description</key>
+			<string>Choose the default system for ambiguous unit shorthand.</string>
+			<key>label</key>
+			<string>Default customary units</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>variable</key>
+			<string>default_customary_system</string>
 		</dict>
 		<dict>
 			<key>config</key>

@@ -43,6 +43,12 @@ In order to set a default currency, you can set it in the Workflow Configuration
 Valid values are the [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency codes: AUD, BRL, CAD, CHF, CNY, CZK, 
 DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, ISK, JPY, KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, TRY, USD, ZAR.
 
+### Default customary units
+
+The Workflow Configuration defaults ambiguous historical shorthand to Imperial (UK) units. Choose US customary to use US definitions for bare `gal`, `pt`, `fl.oz`/`floz`, `tbsp.`, `tsp.`, and `mpg`. Explicit `us.gal`, `us.pt`, `us.fl.oz`, `us.floz`, and `us.mpg` aliases always use US customary units, while native Numbat names such as `gallon`, `tablespoon`, and `fluidounce` remain explicit. `cup` is always US customary.
+
+To convert between systems explicitly, use the lowercase `uk_`/`us_` aliases in the three- or four-token form. Short and long spellings are available as `uk_gal`/`uk_gallon`, `uk_qt`/`uk_quart`, `uk_pt`/`uk_pint`, `uk_gi`/`uk_gill`, `uk_floz`/`uk_fluid_ounce`, `uk_fldr`/`uk_fluid_drachm`, `uk_tbsp`/`uk_tablespoon`, `uk_tsp`/`uk_teaspoon`, and `uk_mpg`/`uk_miles_per_gallon`, with corresponding `us_` forms (the US long fluid-dram spelling is `us_fluid_dram`). For example, `conv 1 uk_floz to us_floz` returns `1 UK fl oz = 0.961 US fl oz`. Explicit aliases ignore the customary-unit preference in both source and target positions. `uk_cup`, bushel, and hogshead aliases are not defined because this workflow has no like-for-like pair for them.
+
 ### Default actions
 
 The Workflow Configuration provides separate Default monetary action and Default non-monetary action preferences. `Open website` remains the default for both; choose `Copy to clipboard` to copy only the converted value instead. <kbd>cmd+return</kbd> always performs the alternate action.

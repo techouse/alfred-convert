@@ -1,4 +1,8 @@
-use super::{LegacyConversion, UnitEngine, legacy_conversion, legacy_unit};
+use super::normalize::{FuelUnit, SpecialUnit};
+use super::{
+    CustomarySystem, LegacyConversion, UnitEngine, legacy_conversion,
+    legacy_conversion_with_customary_system, legacy_unit, legacy_unit_with_customary_system,
+};
 
 const CONVERTIBLE_DART_ALIASES: &[&str] = &[
     "°",
@@ -404,6 +408,317 @@ fn compatibility_aliases_should_keep_imperial_gallon_semantics() -> anyhow::Resu
         legacy_conversion("1 gal l").ok_or_else(|| anyhow::anyhow!("legacy conversion missing"))?;
     let result = engine.evaluate_legacy(conversion)?;
     assert_eq!(result.result, "1 imp gal = 4.546 l");
+    Ok(())
+}
+
+#[test]
+fn customary_system_preference_should_default_to_imperial() {
+    assert_eq!(CustomarySystem::default(), CustomarySystem::Imperial);
+    assert_eq!(
+        CustomarySystem::from_preference(Some("imperial")),
+        CustomarySystem::Imperial
+    );
+    assert_eq!(
+        CustomarySystem::from_preference(Some("us_customary")),
+        CustomarySystem::UsCustomary
+    );
+    assert_eq!(
+        CustomarySystem::from_preference(None),
+        CustomarySystem::Imperial
+    );
+    assert_eq!(
+        CustomarySystem::from_preference(Some("unknown")),
+        CustomarySystem::Imperial
+    );
+}
+
+#[test]
+fn customary_system_should_resolve_ambiguous_aliases_in_both_positions() -> anyhow::Result<()> {
+    for alias in ["gal", "pt", "fl.oz", "floz", "tbsp.", "tsp.", "mpg"] {
+        let imperial = legacy_unit_with_customary_system(alias, CustomarySystem::Imperial)
+            .ok_or_else(|| anyhow::anyhow!("imperial alias {alias} missing"))?;
+        let us = legacy_unit_with_customary_system(alias, CustomarySystem::UsCustomary)
+            .ok_or_else(|| anyhow::anyhow!("US alias {alias} missing"))?;
+        if alias == "mpg" {
+            assert_ne!(imperial.special, us.special, "alias: {alias}");
+        } else {
+            assert_ne!(imperial.expression, us.expression, "alias: {alias}");
+        }
+
+        let companion = if alias == "mpg" { "km/l" } else { "ml" };
+        let imperial_query = format!("1 {alias} {companion}");
+        let us_query = format!("1 {companion} {alias}");
+        let imperial_conversion =
+            legacy_conversion_with_customary_system(&imperial_query, CustomarySystem::Imperial)
+                .ok_or_else(|| anyhow::anyhow!("source alias: {alias}"))?;
+        let us_conversion =
+            legacy_conversion_with_customary_system(&us_query, CustomarySystem::UsCustomary)
+                .ok_or_else(|| anyhow::anyhow!("target alias: {alias}"))?;
+        assert_eq!(imperial_conversion.from, imperial, "source alias: {alias}");
+        assert_eq!(us_conversion.to, us, "target alias: {alias}");
+    }
+    Ok(())
+}
+
+#[test]
+fn customary_system_should_preserve_explicit_us_aliases_and_native_units() -> anyhow::Result<()> {
+    for alias in ["us.gal", "us.pt", "us.fl.oz", "us.floz", "us.mpg"] {
+        let imperial = legacy_unit_with_customary_system(alias, CustomarySystem::Imperial)
+            .ok_or_else(|| anyhow::anyhow!("imperial lookup missing {alias}"))?;
+        let us = legacy_unit_with_customary_system(alias, CustomarySystem::UsCustomary)
+            .ok_or_else(|| anyhow::anyhow!("US lookup missing {alias}"))?;
+        assert_eq!(imperial, us, "explicit alias changed: {alias}");
+    }
+    let mut engine = UnitEngine::new()?;
+    assert_eq!(
+        engine.evaluate_native("1 gallon to liter")?.result,
+        "3.78541 l"
+    );
+    assert_eq!(
+        engine.evaluate_native("1 imperial_gallon to liter")?.result,
+        "4.54609 l"
+    );
+    assert_eq!(engine.evaluate_native("1 cup to mL")?.result, "236.588 ml");
+    Ok(())
+}
+
+#[test]
+fn customary_system_should_match_legacy_volume_and_mpg_coefficients() -> anyhow::Result<()> {
+    let cases = [
+        (
+            "1 floz ml",
+            "1 imp fl oz = 28.413 ml",
+            "1 US fl oz = 29.574 ml",
+        ),
+        ("1 gal l", "1 imp gal = 4.546 l", "1 US gal = 3.785 l"),
+        ("1 pt ml", "1 imp pt = 568.261 ml", "1 US pt = 473.176 ml"),
+        ("1 tbsp. ml", "1 tbsp. = 14.207 ml", "1 tbsp. = 14.787 ml"),
+        ("1 tsp. ml", "1 tsp. = 3.552 ml", "1 tsp. = 4.929 ml"),
+        ("1 mpg km/l", "1 mpg = 0.354 km/l", "1 mpg = 0.425 km/l"),
+    ];
+    for (query, expected_imperial, expected_us) in cases {
+        let mut engine = UnitEngine::new()?;
+        let imperial = legacy_conversion_with_customary_system(query, CustomarySystem::Imperial)
+            .ok_or_else(|| anyhow::anyhow!("imperial conversion missing: {query}"))?;
+        assert_eq!(
+            engine.evaluate_legacy(imperial)?.result,
+            expected_imperial,
+            "{query}"
+        );
+
+        let mut engine = UnitEngine::new()?;
+        let us = legacy_conversion_with_customary_system(query, CustomarySystem::UsCustomary)
+            .ok_or_else(|| anyhow::anyhow!("US conversion missing: {query}"))?;
+        assert_eq!(engine.evaluate_legacy(us)?.result, expected_us, "{query}");
+    }
+    Ok(())
+}
+
+fn assert_explicit_ordinary_aliases(
+    aliases: &[(&[&str], &str, &str)],
+    customary_system: CustomarySystem,
+) -> anyhow::Result<()> {
+    for (alias_names, expression, symbol) in aliases {
+        for alias in *alias_names {
+            let unit = legacy_unit_with_customary_system(alias, customary_system)
+                .ok_or_else(|| anyhow::anyhow!("alias {alias} is missing"))?;
+            assert_eq!(
+                (unit.expression, unit.symbol),
+                (*expression, *symbol),
+                "{alias}"
+            );
+
+            let source = format!("1 {alias} ml");
+            let source_conversion =
+                legacy_conversion_with_customary_system(&source, customary_system)
+                    .ok_or_else(|| anyhow::anyhow!("source alias {alias} is missing"))?;
+            assert_eq!(source_conversion.from, unit, "source alias {alias}");
+
+            let target = format!("1 ml {alias}");
+            let target_conversion =
+                legacy_conversion_with_customary_system(&target, customary_system)
+                    .ok_or_else(|| anyhow::anyhow!("target alias {alias} is missing"))?;
+            assert_eq!(target_conversion.to, unit, "target alias {alias}");
+        }
+    }
+    Ok(())
+}
+
+fn assert_explicit_fuel_aliases(customary_system: CustomarySystem) -> anyhow::Result<()> {
+    for (alias, unit) in [
+        ("uk_mpg", FuelUnit::MilesPerImperialGallon),
+        ("uk_miles_per_gallon", FuelUnit::MilesPerImperialGallon),
+        ("us_mpg", FuelUnit::MilesPerUsGallon),
+        ("us_miles_per_gallon", FuelUnit::MilesPerUsGallon),
+    ] {
+        let resolved = legacy_unit_with_customary_system(alias, customary_system)
+            .ok_or_else(|| anyhow::anyhow!("fuel alias {alias} is missing"))?;
+        assert_eq!(
+            resolved.symbol,
+            if alias.starts_with("uk_") {
+                "UK mpg"
+            } else {
+                "US mpg"
+            }
+        );
+        assert_eq!(resolved.special, SpecialUnit::Fuel(unit), "{alias}");
+
+        let source = format!("1 {alias} km/l");
+        let source_conversion = legacy_conversion_with_customary_system(&source, customary_system)
+            .ok_or_else(|| anyhow::anyhow!("source fuel alias {alias} is missing"))?;
+        assert_eq!(source_conversion.from, resolved, "source alias {alias}");
+
+        let target = format!("1 km/l {alias}");
+        let target_conversion = legacy_conversion_with_customary_system(&target, customary_system)
+            .ok_or_else(|| anyhow::anyhow!("target fuel alias {alias} is missing"))?;
+        assert_eq!(target_conversion.to, resolved, "target alias {alias}");
+    }
+    Ok(())
+}
+
+#[test]
+fn explicit_customary_aliases_should_resolve_independently_of_preference() -> anyhow::Result<()> {
+    let ordinary_aliases = [
+        (
+            ["uk_gal", "uk_gallon"].as_slice(),
+            "imperial_gallon",
+            "UK gal",
+        ),
+        (["us_gal", "us_gallon"].as_slice(), "gallon", "US gal"),
+        (["uk_qt", "uk_quart"].as_slice(), "imperial_quart", "UK qt"),
+        (["us_qt", "us_quart"].as_slice(), "gallon / 4", "US qt"),
+        (["uk_pt", "uk_pint"].as_slice(), "imperial_pint", "UK pt"),
+        (["us_pt", "us_pint"].as_slice(), "pint", "US pt"),
+        (["uk_gi", "uk_gill"].as_slice(), "imperial_gill", "UK gi"),
+        (["us_gi", "us_gill"].as_slice(), "gallon / 32", "US gi"),
+        (
+            ["uk_floz", "uk_fluid_ounce"].as_slice(),
+            "imperial_fluidounce",
+            "UK fl oz",
+        ),
+        (
+            ["us_floz", "us_fluid_ounce"].as_slice(),
+            "fluidounce",
+            "US fl oz",
+        ),
+        (
+            ["uk_fldr", "uk_fluid_drachm"].as_slice(),
+            "imperial_fluid_drachm",
+            "UK fl dr",
+        ),
+        (
+            ["us_fldr", "us_fluid_dram"].as_slice(),
+            "fluidounce / 8",
+            "US fl dr",
+        ),
+        (
+            ["uk_tbsp", "uk_tablespoon"].as_slice(),
+            "imperial_tablespoon",
+            "UK tbsp",
+        ),
+        (
+            ["us_tbsp", "us_tablespoon"].as_slice(),
+            "tablespoon",
+            "US tbsp",
+        ),
+        (
+            ["uk_tsp", "uk_teaspoon"].as_slice(),
+            "imperial_teaspoon",
+            "UK tsp",
+        ),
+        (["us_tsp", "us_teaspoon"].as_slice(), "teaspoon", "US tsp"),
+    ];
+    for customary_system in [CustomarySystem::Imperial, CustomarySystem::UsCustomary] {
+        assert_explicit_ordinary_aliases(&ordinary_aliases, customary_system)?;
+        assert_explicit_fuel_aliases(customary_system)?;
+    }
+    assert!(
+        legacy_conversion_with_customary_system("1 uk_cup us_cup", CustomarySystem::Imperial)
+            .is_none()
+    );
+    Ok(())
+}
+
+#[test]
+fn explicit_customary_pairs_should_render_the_same_under_both_preferences() -> anyhow::Result<()> {
+    let cases = [
+        (
+            "1 uk_gal to us_gal",
+            "1 UK gal = 1.201 US gal",
+            "1 us_gal to uk_gal",
+            "1 US gal = 0.833 UK gal",
+        ),
+        (
+            "1 uk_qt to us_qt",
+            "1 UK qt = 1.201 US qt",
+            "1 us_qt to uk_qt",
+            "1 US qt = 0.833 UK qt",
+        ),
+        (
+            "1 uk_pt to us_pt",
+            "1 UK pt = 1.201 US pt",
+            "1 us_pt to uk_pt",
+            "1 US pt = 0.833 UK pt",
+        ),
+        (
+            "1 uk_gi to us_gi",
+            "1 UK gi = 1.201 US gi",
+            "1 us_gi to uk_gi",
+            "1 US gi = 0.833 UK gi",
+        ),
+        (
+            "1 uk_floz to us_floz",
+            "1 UK fl oz = 0.961 US fl oz",
+            "1 us_floz to uk_floz",
+            "1 US fl oz = 1.041 UK fl oz",
+        ),
+        (
+            "1 uk_fldr to us_fldr",
+            "1 UK fl dr = 0.961 US fl dr",
+            "1 us_fldr to uk_fldr",
+            "1 US fl dr = 1.041 UK fl dr",
+        ),
+        (
+            "1 uk_tbsp to us_tbsp",
+            "1 UK tbsp = 0.961 US tbsp",
+            "1 us_tbsp to uk_tbsp",
+            "1 US tbsp = 1.041 UK tbsp",
+        ),
+        (
+            "1 uk_tsp to us_tsp",
+            "1 UK tsp = 0.721 US tsp",
+            "1 us_tsp to uk_tsp",
+            "1 US tsp = 1.388 UK tsp",
+        ),
+        (
+            "1 uk_mpg to us_mpg",
+            "1 UK mpg = 0.833 US mpg",
+            "1 us_mpg to uk_mpg",
+            "1 US mpg = 1.201 UK mpg",
+        ),
+    ];
+    for customary_system in [CustomarySystem::Imperial, CustomarySystem::UsCustomary] {
+        let mut engine = UnitEngine::new()?;
+        for (forward, expected_forward, reverse, expected_reverse) in cases {
+            let forward_conversion =
+                legacy_conversion_with_customary_system(forward, customary_system)
+                    .ok_or_else(|| anyhow::anyhow!("pair should parse: {forward}"))?;
+            assert_eq!(
+                engine.evaluate_legacy(forward_conversion)?.result,
+                expected_forward,
+                "{forward}"
+            );
+
+            let reverse_conversion =
+                legacy_conversion_with_customary_system(reverse, customary_system)
+                    .ok_or_else(|| anyhow::anyhow!("pair should parse: {reverse}"))?;
+            assert_eq!(
+                engine.evaluate_legacy(reverse_conversion)?.result,
+                expected_reverse,
+                "{reverse}"
+            );
+        }
+    }
     Ok(())
 }
 

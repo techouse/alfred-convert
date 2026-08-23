@@ -6,14 +6,14 @@ use std::process::ExitCode;
 use std::time::Duration;
 
 use alfred_convert::app::{
-    DefaultAction, PendingItem, conversion_item, currency_items, invalid_item, placeholder_item,
-    unit_items,
+    DefaultAction, PendingItem, conversion_item_with_customary_system, currency_items,
+    invalid_item, placeholder_item, unit_items,
 };
 use alfred_convert::cli::Cli;
 use alfred_convert::currency::{Currency, EcbClient, ExchangeRateCache};
 use alfred_convert::format::parse_decimal;
 use alfred_convert::services::emoji_image_cache::EmojiImageCache;
-use alfred_convert::units::UnitEngine;
+use alfred_convert::units::{CustomarySystem, UnitEngine};
 use alfred_workflow_rs::{Icon, Item, RenderOptions, Updater, UserConfiguration, Workflow};
 use anyhow::{Result, anyhow};
 use jiff::Timestamp;
@@ -107,11 +107,12 @@ fn populate_workflow(workflow: &mut Workflow, cli: &Cli) -> Result<()> {
         None
     };
     let mut unit_engine = None;
-    let item = conversion_item(
+    let item = conversion_item_with_customary_system(
         &query,
         settings.home_currency,
         settings.default_monetary_action,
         settings.default_non_monetary_action,
+        settings.customary_system,
         rates.as_ref(),
         &mut unit_engine,
     )?;
@@ -188,6 +189,7 @@ struct WorkflowSettings {
     home_currency: Currency,
     default_monetary_action: DefaultAction,
     default_non_monetary_action: DefaultAction,
+    customary_system: CustomarySystem,
 }
 
 fn workflow_settings(workflow: &Workflow, directory: &Path) -> Result<WorkflowSettings> {
@@ -215,10 +217,15 @@ fn workflow_settings_from_defaults(
         Some(UserConfiguration::Select(configuration)) => Some(configuration.config.value.as_str()),
         _ => None,
     };
+    let configured_customary_system = match defaults.get("default_customary_system") {
+        Some(UserConfiguration::Select(configuration)) => Some(configuration.config.value.as_str()),
+        _ => None,
+    };
     Ok(WorkflowSettings {
         home_currency,
         default_monetary_action: DefaultAction::from_preference(configured_monetary_action),
         default_non_monetary_action: DefaultAction::from_preference(configured_non_monetary_action),
+        customary_system: CustomarySystem::from_preference(configured_customary_system),
     })
 }
 

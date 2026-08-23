@@ -10,6 +10,27 @@ pub struct LegacyUnit {
     pub special: SpecialUnit,
 }
 
+/// Selects which customary system ambiguous historical shorthand uses.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum CustomarySystem {
+    /// Use UK/Imperial definitions.
+    #[default]
+    Imperial,
+    /// Use US customary definitions.
+    UsCustomary,
+}
+
+impl CustomarySystem {
+    /// Parses the Alfred preference, defaulting to Imperial for unknown values.
+    #[must_use]
+    pub fn from_preference(value: Option<&str>) -> Self {
+        match value {
+            Some("us_customary") => Self::UsCustomary,
+            _ => Self::Imperial,
+        }
+    }
+}
+
 /// Legacy conversions that need an affine or reciprocal Numbat function.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum SpecialUnit {
@@ -51,6 +72,15 @@ pub struct LegacyConversion<'a> {
 /// Recognizes only the Dart workflow's exact three/four-token shorthand.
 #[must_use]
 pub fn legacy_conversion(query: &str) -> Option<LegacyConversion<'_>> {
+    legacy_conversion_with_customary_system(query, CustomarySystem::default())
+}
+
+/// Recognizes historical shorthand using the selected customary system.
+#[must_use]
+pub fn legacy_conversion_with_customary_system(
+    query: &str,
+    customary_system: CustomarySystem,
+) -> Option<LegacyConversion<'_>> {
     let parts = query.split(' ').collect::<Vec<_>>();
     let (amount, from, to) = match parts.as_slice() {
         [amount, from, to] => (*amount, *from, *to),
@@ -62,8 +92,8 @@ pub fn legacy_conversion(query: &str) -> Option<LegacyConversion<'_>> {
     parse_decimal(amount)?;
     Some(LegacyConversion {
         amount,
-        from: legacy_unit(from)?,
-        to: legacy_unit(to)?,
+        from: legacy_unit_with_customary_system(from, customary_system)?,
+        to: legacy_unit_with_customary_system(to, customary_system)?,
     })
 }
 
@@ -71,6 +101,16 @@ pub fn legacy_conversion(query: &str) -> Option<LegacyConversion<'_>> {
 #[must_use]
 #[allow(clippy::too_many_lines)]
 pub fn legacy_unit(alias: &str) -> Option<LegacyUnit> {
+    legacy_unit_with_customary_system(alias, CustomarySystem::default())
+}
+
+/// Finds metadata for a historical alias using the selected customary system.
+#[must_use]
+#[allow(clippy::too_many_lines)]
+pub fn legacy_unit_with_customary_system(
+    alias: &str,
+    customary_system: CustomarySystem,
+) -> Option<LegacyUnit> {
     let ordinary = |expression, symbol, dimension, emoji| LegacyUnit {
         expression,
         symbol,
@@ -164,7 +204,12 @@ pub fn legacy_unit(alias: &str) -> Option<LegacyUnit> {
         "km/l" => fuel("km/l", FuelUnit::KilometersPerLiter),
         "l/100km" => fuel("l/100km", FuelUnit::LitersPer100Kilometers),
         "us.mpg" => fuel("mpg", FuelUnit::MilesPerUsGallon),
-        "mpg" => fuel("mpg", FuelUnit::MilesPerImperialGallon),
+        "uk_mpg" | "uk_miles_per_gallon" => fuel("UK mpg", FuelUnit::MilesPerImperialGallon),
+        "us_mpg" | "us_miles_per_gallon" => fuel("US mpg", FuelUnit::MilesPerUsGallon),
+        "mpg" => match customary_system {
+            CustomarySystem::Imperial => fuel("mpg", FuelUnit::MilesPerImperialGallon),
+            CustomarySystem::UsCustomary => fuel("mpg", FuelUnit::MilesPerUsGallon),
+        },
 
         "lx" => ordinary("lux", "lx", "Illuminance", "💡"),
         "fc" => ordinary("footcandle", "fc", "Illuminance", "💡"),
@@ -259,19 +304,48 @@ pub fn legacy_unit(alias: &str) -> Option<LegacyUnit> {
 
         "m3" => ordinary("m^3", "m³", "Volume", "🧪"),
         "l" | "L" => ordinary("L", "l", "Volume", "🧪"),
-        "gal" => ordinary("imperial_gallon", "imp gal", "Volume", "🧪"),
-        "us.gal" => ordinary("gallon", "US gal", "Volume", "🧪"),
-        "pt" => ordinary("imperial_pint", "imp pt", "Volume", "🧪"),
-        "us.pt" => ordinary("pint", "US pt", "Volume", "🧪"),
+        "gal" => match customary_system {
+            CustomarySystem::Imperial => ordinary("imperial_gallon", "imp gal", "Volume", "🧪"),
+            CustomarySystem::UsCustomary => ordinary("gallon", "US gal", "Volume", "🧪"),
+        },
+        "uk_gal" | "uk_gallon" => ordinary("imperial_gallon", "UK gal", "Volume", "🧪"),
+        "us.gal" | "us_gal" | "us_gallon" => ordinary("gallon", "US gal", "Volume", "🧪"),
+        "pt" => match customary_system {
+            CustomarySystem::Imperial => ordinary("imperial_pint", "imp pt", "Volume", "🧪"),
+            CustomarySystem::UsCustomary => ordinary("pint", "US pt", "Volume", "🧪"),
+        },
+        "uk_qt" | "uk_quart" => ordinary("imperial_quart", "UK qt", "Volume", "🧪"),
+        "us_qt" | "us_quart" => ordinary("gallon / 4", "US qt", "Volume", "🧪"),
+        "uk_pt" | "uk_pint" => ordinary("imperial_pint", "UK pt", "Volume", "🧪"),
+        "us.pt" | "us_pt" | "us_pint" => ordinary("pint", "US pt", "Volume", "🧪"),
+        "uk_gi" | "uk_gill" => ordinary("imperial_gill", "UK gi", "Volume", "🧪"),
+        "us_gi" | "us_gill" => ordinary("gallon / 32", "US gi", "Volume", "🧪"),
         "ml" => ordinary("mL", "ml", "Volume", "🧪"),
-        "tbsp." => ordinary("tablespoon", "tbsp.", "Volume", "🧪"),
+        "tbsp." => match customary_system {
+            CustomarySystem::Imperial => ordinary("imperial_tablespoon", "tbsp.", "Volume", "🧪"),
+            CustomarySystem::UsCustomary => ordinary("tablespoon", "tbsp.", "Volume", "🧪"),
+        },
+        "uk_tbsp" | "uk_tablespoon" => ordinary("imperial_tablespoon", "UK tbsp", "Volume", "🧪"),
+        "us_tbsp" | "us_tablespoon" => ordinary("tablespoon", "US tbsp", "Volume", "🧪"),
         "cup" => ordinary("cup", "cup", "Volume", "🧪"),
         "cm3" => ordinary("cm^3", "cm³", "Volume", "🧪"),
         "ft3" => ordinary("ft^3", "ft³", "Volume", "🧪"),
         "in3" => ordinary("in^3", "in³", "Volume", "🧪"),
         "mm3" => ordinary("mm^3", "mm³", "Volume", "🧪"),
-        "fl.oz" | "floz" => ordinary("imperial_fluidounce", "imp fl oz", "Volume", "🧪"),
-        "us.fl.oz" | "us.floz" => ordinary("fluidounce", "US fl oz", "Volume", "🧪"),
+        "fl.oz" | "floz" => match customary_system {
+            CustomarySystem::Imperial => {
+                ordinary("imperial_fluidounce", "imp fl oz", "Volume", "🧪")
+            }
+            CustomarySystem::UsCustomary => ordinary("fluidounce", "US fl oz", "Volume", "🧪"),
+        },
+        "uk_floz" | "uk_fluid_ounce" => ordinary("imperial_fluidounce", "UK fl oz", "Volume", "🧪"),
+        "us.fl.oz" | "us.floz" | "us_floz" | "us_fluid_ounce" => {
+            ordinary("fluidounce", "US fl oz", "Volume", "🧪")
+        }
+        "uk_fldr" | "uk_fluid_drachm" => {
+            ordinary("imperial_fluid_drachm", "UK fl dr", "Volume", "🧪")
+        }
+        "us_fldr" | "us_fluid_dram" => ordinary("fluidounce / 8", "US fl dr", "Volume", "🧪"),
         "US. liq. gi" => ordinary("gallon / 32", "US. liq. gi", "Volume", "🧪"),
         "US. liq. qt" => ordinary("gallon / 4", "US. liq. qt", "Volume", "🧪"),
         "fl" => ordinary("femtoliter", "fl", "Volume", "🧪"),
@@ -280,7 +354,12 @@ pub fn legacy_unit(alias: &str) -> Option<LegacyUnit> {
         "µl" => ordinary("microliter", "µl", "Volume", "🧪"),
         "dl" => ordinary("deciliter", "dl", "Volume", "🧪"),
         "cl" => ordinary("centiliter", "cl", "Volume", "🧪"),
-        "tsp." => ordinary("legacy_metric_teaspoon", "tsp.", "Volume", "🧪"),
+        "tsp." => match customary_system {
+            CustomarySystem::Imperial => ordinary("imperial_teaspoon", "tsp.", "Volume", "🧪"),
+            CustomarySystem::UsCustomary => ordinary("teaspoon", "tsp.", "Volume", "🧪"),
+        },
+        "uk_tsp" | "uk_teaspoon" => ordinary("imperial_teaspoon", "UK tsp", "Volume", "🧪"),
+        "us_tsp" | "us_teaspoon" => ordinary("teaspoon", "US tsp", "Volume", "🧪"),
         _ => return None,
     })
 }
