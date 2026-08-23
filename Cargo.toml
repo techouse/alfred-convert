@@ -10,6 +10,7 @@ publish = false
 [dependencies]
 alfred_workflow_rs = "1.0.1"
 anyhow = "1.0"
+computus = { version = "2.0.0", features = ["jiff"] }
 jiff = { version = "0.2", features = ["serde"] }
 numbat = { version = "1.23.0", default-features = false }
 quick-xml = "0.42"

@@ -6,12 +6,13 @@ use std::thread;
 use flate2::Compression;
 use flate2::write::GzEncoder;
 use jiff::Timestamp;
+use jiff::civil::Date;
 use tempfile::TempDir;
 use url::Url;
 
 use super::{
     CONNECT_TIMEOUT, EcbClient, ExchangeRateCache, MAX_RESPONSE_BYTES, REQUEST_TIMEOUT,
-    gregorian_easter, parse_exchange_rates, platform_agent, should_refresh,
+    is_fixed_holiday, is_target_closing_day, parse_exchange_rates, platform_agent, should_refresh,
 };
 
 #[test]
@@ -26,6 +27,14 @@ fn cache_older_than_two_days_should_refresh_even_on_weekend() -> anyhow::Result<
     let cached = "2026-08-20T00:00:00Z".parse::<Timestamp>()?;
     let now = "2026-08-23T12:00:00Z".parse::<Timestamp>()?;
     assert!(should_refresh(cached, now)?);
+    Ok(())
+}
+
+#[test]
+fn recent_cache_should_not_refresh_on_weekend() -> anyhow::Result<()> {
+    let cached = "2026-08-21T00:00:00Z".parse::<Timestamp>()?;
+    let now = "2026-08-22T15:01:00Z".parse::<Timestamp>()?;
+    assert!(!should_refresh(cached, now)?);
     Ok(())
 }
 
@@ -135,7 +144,65 @@ fn malformed_gzip_should_be_a_refresh_failure() -> anyhow::Result<()> {
 }
 
 #[test]
-fn computed_easter_should_match_the_dart_table_through_2050() -> anyhow::Result<()> {
+fn good_friday_should_be_a_target_closing_day_across_years() -> anyhow::Result<()> {
+    for date in ["2024-03-29", "2025-04-18", "2026-04-03", "2038-04-23"] {
+        assert!(
+            is_target_closing_day(date.parse::<Date>()?)?,
+            "date: {date}"
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn easter_monday_should_be_a_target_closing_day_across_years() -> anyhow::Result<()> {
+    for date in ["2024-04-01", "2025-04-21", "2026-04-06", "2038-04-26"] {
+        assert!(
+            is_target_closing_day(date.parse::<Date>()?)?,
+            "date: {date}"
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn fixed_target_holidays_should_remain_closing_days() -> anyhow::Result<()> {
+    for date in ["2026-01-01", "2026-05-01", "2026-12-25", "2026-12-26"] {
+        assert!(is_fixed_holiday(date.parse::<Date>()?), "date: {date}");
+    }
+    Ok(())
+}
+
+#[test]
+fn ordinary_weekday_should_not_be_a_target_closing_day() -> anyhow::Result<()> {
+    assert!(!is_target_closing_day("2026-08-21".parse::<Date>()?)?);
+    Ok(())
+}
+
+#[test]
+fn non_target_religious_holidays_should_remain_working_days() -> anyhow::Result<()> {
+    for date in ["2026-05-14", "2026-05-25"] {
+        assert!(
+            !is_target_closing_day(date.parse::<Date>()?)?,
+            "date: {date}"
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn weekend_should_be_a_target_closing_day() -> anyhow::Result<()> {
+    for date in ["2026-08-22", "2026-08-23"] {
+        assert!(
+            is_target_closing_day(date.parse::<Date>()?)?,
+            "date: {date}"
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn computus_easter_should_match_the_dart_table_through_2050() -> anyhow::Result<()> {
     let expected = [
         "2025-04-20",
         "2026-04-05",
@@ -165,8 +232,8 @@ fn computed_easter_should_match_the_dart_table_through_2050() -> anyhow::Result<
         "2050-04-10",
     ];
     for (offset, expected) in expected.into_iter().enumerate() {
-        let year = i16::try_from(2025 + offset)?;
-        assert_eq!(gregorian_easter(year)?.to_string(), expected);
+        let year = i32::try_from(2025 + offset)?;
+        assert_eq!(computus::gregorian_jiff_date(year)?.to_string(), expected);
     }
     Ok(())
 }
