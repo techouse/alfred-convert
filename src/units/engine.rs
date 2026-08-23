@@ -16,6 +16,8 @@ const COMPATIBILITY: &str = include_str!("compatibility.nbt");
 pub struct UnitEvaluation {
     /// Plain-text value produced by Numbat.
     pub result: String,
+    /// Converted value suitable for copying without the input expression.
+    pub copy_value: String,
     /// Optional legacy fact string for old shorthand queries.
     pub legacy_fact: Option<String>,
     /// Optional legacy dimension emoji.
@@ -65,8 +67,10 @@ impl UnitEngine {
     /// Returns an error for invalid expressions or statements without a value.
     pub fn evaluate_native(&mut self, expression: &str) -> Result<UnitEvaluation> {
         let value = self.evaluate(expression)?;
+        let result = plain_value(&value);
         Ok(UnitEvaluation {
-            result: plain_value(&value),
+            copy_value: result.clone(),
+            result,
             legacy_fact: None,
             emoji: None,
         })
@@ -88,14 +92,14 @@ impl UnitEngine {
         let single = self.legacy_value("1", conversion.from, conversion.to)?;
         let amount =
             parse_decimal(conversion.amount).ok_or_else(|| anyhow!("invalid decimal amount"))?;
+        let copy_value = format!("{} {}", format_decimal(converted), conversion.to.symbol);
         Ok(UnitEvaluation {
             result: format!(
-                "{} {} = {} {}",
+                "{} {} = {copy_value}",
                 format_decimal(amount),
-                conversion.from.symbol,
-                format_decimal(converted),
-                conversion.to.symbol
+                conversion.from.symbol
             ),
+            copy_value,
             legacy_fact: Some(format!(
                 "Based on the fact that 1 {} = {} {}",
                 conversion.from.symbol,

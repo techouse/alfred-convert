@@ -20,15 +20,17 @@ Heavily inspired by [deanishe/alfred-convert](https://github.com/deanishe/alfred
 ## Usage
 
 - `conv <quantity> <from unit> <to unit>` - Perform a conversion
-    - When performing a monetary conversion pressing `⌘Y` or <kbd>return</kbd> (↵) will open the currency-pair chart on [Xe.com](http://www.xe.com).
-      - When pressing <kbd>option+return</kbd> (⌥↵) you will get the inverse currency conversion, i.e. `12 USD to EUR` becomes `12 EUR to USD`.
-      - When pressing <kbd>cmd+return</kbd> (⌘↵) you will copy the converted value to your clipboard.
-    - When performing a physical unit conversion pressing `⌘Y` or <kbd>return</kbd> (↵) will open up detailed the conversion
-      explanation on [WolframAlpha.com](https://www.wolframalpha.com).
+    - For monetary conversions, <kbd>return</kbd> (↵) performs the configured Default monetary action: open the currency-pair chart on [Xe.com](http://www.xe.com) or copy the converted value.
+      - <kbd>cmd+return</kbd> (⌘↵) performs the alternate action.
+      - <kbd>option+return</kbd> (⌥↵) shows the inverse conversion and copies its value when Copy to clipboard is the default.
+      - Quick Look (`⌘Y`) always opens the Xe chart.
+    - For physical unit conversions and other Numbat evaluations, <kbd>return</kbd> (↵) performs the configured Default non-monetary action: open the result on [WolframAlpha.com](https://www.wolframalpha.com) or copy the converted value.
+      - <kbd>cmd+return</kbd> (⌘↵) performs the alternate action.
+      - Quick Look (`⌘Y`) always opens the WolframAlpha result.
 - `conv money` - View a list of all the supported currencies
-    - When pressing `⌘Y` or <kbd>return</kbd> (↵) on a certain currency you will be directed to the chart with the home currency on [Xe.com](http://www.xe.com).
-      - When pressing <kbd>option+return</kbd> (⌥↵) you will get the inverse currency conversion, i.e. `1 AUD = 0.558 GBP` becomes `1 GBP = 1.792 AUD`.
-      - When pressing <kbd>cmd+return</kbd> (⌘↵) you will copy the equivalent in the home currency to your clipboard.
+    - Rate-backed rows use the same configured Default monetary action and <kbd>cmd+return</kbd> (⌘↵) alternate action.
+      - <kbd>option+return</kbd> (⌥↵) shows the inverse rate and copies it when Copy to clipboard is the default.
+      - Quick Look (`⌘Y`) always opens the Xe chart.
 - `conv units` - View a list of all the supported physical units
     - When selecting a certain unit and pressing <kbd>return</kbd> (↵) that unit's symbol will get copied to the clipboard.
 
@@ -40,6 +42,10 @@ In order to set a default currency, you can set it in the Workflow Configuration
 
 Valid values are the [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency codes: AUD, BRL, CAD, CHF, CNY, CZK, 
 DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, ISK, JPY, KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, TRY, USD, ZAR.
+
+### Default actions
+
+The Workflow Configuration provides separate Default monetary action and Default non-monetary action preferences. `Open website` remains the default for both; choose `Copy to clipboard` to copy only the converted value instead. <kbd>cmd+return</kbd> always performs the alternate action.
 
 ### Notes
 

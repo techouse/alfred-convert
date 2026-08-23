@@ -20,11 +20,11 @@
 			</dict>
 			<dict>
 				<key>destinationuid</key>
-				<string>572C1CAB-814A-4C59-8D8C-04C69F788090</string>
+				<string>DF31843F-F908-4B26-BA46-A24A1C902306</string>
 				<key>modifiers</key>
 				<integer>1048576</integer>
 				<key>modifiersubtext</key>
-				<string>Only copy to clipboard</string>
+				<string></string>
 				<key>vitoclose</key>
 				<false/>
 			</dict>
@@ -330,15 +330,17 @@ Heavily inspired by [deanishe/alfred-convert](https://github.com/deanishe/alfred
 ## Usage
 
 - `conv &lt;quantity&gt; &lt;from unit&gt; &lt;to unit&gt;` - Perform a conversion
-    - When performing a monetary conversion pressing `⌘Y` or &lt;kbd&gt;return&lt;/kbd&gt; (↵) will open the currency-pair chart on [Xe.com](http://www.xe.com).
-      - When pressing &lt;kbd&gt;option+return&lt;/kbd&gt; (⌥↵) you will get the inverse currency conversion, i.e. `12 USD to EUR` becomes `12 EUR to USD`.
-      - When pressing &lt;kbd&gt;cmd+return&lt;/kbd&gt; (⇧↵) you will copy the converted value to your clipboard.
-    - When performing a physical unit conversion pressing `⌘Y` or &lt;kbd&gt;return&lt;/kbd&gt; (↵) will open up detailed the conversion
-      explanation on [WolframAlpha.com](https://www.wolframalpha.com).
+    - For monetary conversions, &lt;kbd&gt;return&lt;/kbd&gt; (↵) performs the configured Default monetary action: open the currency-pair chart on [Xe.com](http://www.xe.com) or copy the converted value.
+      - &lt;kbd&gt;cmd+return&lt;/kbd&gt; (⌘↵) performs the alternate action.
+      - &lt;kbd&gt;option+return&lt;/kbd&gt; (⌥↵) shows the inverse conversion and copies its value when Copy to clipboard is the default.
+      - Quick Look (`⌘Y`) always opens the Xe chart.
+    - For physical unit conversions and other Numbat evaluations, &lt;kbd&gt;return&lt;/kbd&gt; (↵) performs the configured Default non-monetary action: open the result on [WolframAlpha.com](https://www.wolframalpha.com) or copy the converted value.
+      - &lt;kbd&gt;cmd+return&lt;/kbd&gt; (⌘↵) performs the alternate action.
+      - Quick Look (`⌘Y`) always opens the WolframAlpha result.
 - `conv money` - View a list of all the supported currencies
-    - When pressing `⌘Y` or &lt;kbd&gt;return&lt;/kbd&gt; (↵) on a certain currency you will be directed to the chart with the home currency on [Xe.com](http://www.xe.com).
-      - When pressing &lt;kbd&gt;option+return&lt;/kbd&gt; (⌥↵) you will get the inverse currency conversion, i.e. `1 AUD = 0.558 GBP` becomes `1 GBP = 1.792 AUD`.
-      - When pressing &lt;kbd&gt;cmd+return&lt;/kbd&gt; (⇧↵) you will copy the equivalent in the home currency to your clipboard.
+    - Rate-backed rows use the same configured Default monetary action and &lt;kbd&gt;cmd+return&lt;/kbd&gt; (⌘↵) alternate action.
+      - &lt;kbd&gt;option+return&lt;/kbd&gt; (⌥↵) shows the inverse rate and copies it when Copy to clipboard is the default.
+      - Quick Look (`⌘Y`) always opens the Xe chart.
 - `conv units` - View a list of all the supported physical units
     - When selecting a certain unit and pressing &lt;kbd&gt;return&lt;/kbd&gt; (↵) that unit's symbol will get copied to the clipboard.</string>
 	<key>uidata</key>
@@ -529,6 +531,58 @@ Heavily inspired by [deanishe/alfred-convert](https://github.com/deanishe/alfred
 			<string>popupbutton</string>
 			<key>variable</key>
 			<string>default_currency</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>open_website</string>
+				<key>pairs</key>
+				<array>
+					<array>
+						<string>Open website</string>
+						<string>open_website</string>
+					</array>
+					<array>
+						<string>Copy to clipboard</string>
+						<string>copy_to_clipboard</string>
+					</array>
+				</array>
+			</dict>
+			<key>description</key>
+			<string>Choose what Return does for currency results.</string>
+			<key>label</key>
+			<string>Default monetary action</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>variable</key>
+			<string>default_monetary_action</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>open_website</string>
+				<key>pairs</key>
+				<array>
+					<array>
+						<string>Open website</string>
+						<string>open_website</string>
+					</array>
+					<array>
+						<string>Copy to clipboard</string>
+						<string>copy_to_clipboard</string>
+					</array>
+				</array>
+			</dict>
+			<key>description</key>
+			<string>Choose what Return does for non-monetary results.</string>
+			<key>label</key>
+			<string>Default non-monetary action</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>variable</key>
+			<string>default_non_monetary_action</string>
 		</dict>
 	</array>
 	<key>version</key>

@@ -23,6 +23,27 @@ pub struct PendingItem {
     emoji: Option<String>,
 }
 
+/// Default Return action for conversion results.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum DefaultAction {
+    /// Open the result's website.
+    #[default]
+    OpenWebsite,
+    /// Copy the converted value to the clipboard.
+    CopyToClipboard,
+}
+
+impl DefaultAction {
+    /// Parses the stored Alfred preference, falling back to the website action.
+    #[must_use]
+    pub fn from_preference(value: Option<&str>) -> Self {
+        match value {
+            Some("copy_to_clipboard") => Self::CopyToClipboard,
+            _ => Self::OpenWebsite,
+        }
+    }
+}
+
 impl PendingItem {
     fn new(item: Item, emoji: Option<&str>) -> Self {
         Self {
@@ -67,6 +88,8 @@ pub fn invalid_item(message: Option<&str>) -> Item {
 pub fn conversion_item(
     query: &str,
     home: Currency,
+    monetary_default_action: DefaultAction,
+    non_monetary_default_action: DefaultAction,
     rates: Option<&ExchangeRates>,
     unit_engine: &mut Option<UnitEngine>,
 ) -> Result<PendingItem> {
@@ -75,7 +98,7 @@ pub fn conversion_item(
         if parse_decimal(parts[0]).is_none() {
             return Ok(PendingItem::new(invalid_item(None), None));
         }
-        return currency_conversion_item(&parts, from, home, rates);
+        return currency_conversion_item(&parts, from, home, monetary_default_action, rates);
     }
     if parts
         .iter()
@@ -98,10 +121,19 @@ pub fn conversion_item(
                     conversion.from.symbol,
                     conversion.to.symbol
                 ))?;
-                let item = Item::with_arg(evaluation.result, url.as_str())
+                let copy_subtitle = format!("Copy {} to clipboard", evaluation.copy_value);
+                let actions = result_actions(
+                    non_monetary_default_action,
+                    url.as_str(),
+                    evaluation.copy_value,
+                    copy_subtitle,
+                    "Open conversion details on WolframAlpha.com",
+                );
+                let item = Item::with_arg(evaluation.result, actions.default_arg)
                     .set_subtitle(evaluation.legacy_fact.unwrap_or_default())
                     .set_quick_look_url(url.as_str())
-                    .set_valid(true);
+                    .set_valid(true)
+                    .try_set_modifier([ModifierKey::Cmd], actions.command_modifier)?;
                 Ok(PendingItem::new(item, evaluation.emoji))
             }
             Err(error) => Ok(PendingItem::new(
@@ -114,10 +146,22 @@ pub fn conversion_item(
     match engine.evaluate_native(query) {
         Ok(evaluation) => {
             let url = wolfram_url(query)?;
-            let item = Item::with_arg(format!("{query} = {}", evaluation.result), url.as_str())
-                .set_subtitle("Evaluated with Numbat")
-                .set_quick_look_url(url.as_str())
-                .set_valid(true);
+            let copy_subtitle = format!("Copy {} to clipboard", evaluation.copy_value);
+            let actions = result_actions(
+                non_monetary_default_action,
+                url.as_str(),
+                evaluation.copy_value,
+                copy_subtitle,
+                "Open evaluation details on WolframAlpha.com",
+            );
+            let item = Item::with_arg(
+                format!("{query} = {}", evaluation.result),
+                actions.default_arg,
+            )
+            .set_subtitle("Evaluated with Numbat")
+            .set_quick_look_url(url.as_str())
+            .set_valid(true)
+            .try_set_modifier([ModifierKey::Cmd], actions.command_modifier)?;
             Ok(PendingItem::new(item, None))
         }
         Err(_) => Ok(PendingItem::new(invalid_item(None), None)),
@@ -128,6 +172,7 @@ fn currency_conversion_item(
     parts: &[&str],
     from: Currency,
     home: Currency,
+    default_action: DefaultAction,
     rates: Option<&ExchangeRates>,
 ) -> Result<PendingItem> {
     let to_code = match parts {
@@ -159,6 +204,31 @@ fn currency_conversion_item(
         .checked_mul(inverted_rate)
         .ok_or_else(|| anyhow!("inverse currency conversion overflowed"))?;
     let url = xe_url(from, to)?;
+    let actions = result_actions(
+        default_action,
+        url.as_str(),
+        format!("{} {}", format_decimal(converted), to.code()),
+        format!(
+            "Copy {} {} {} to clipboard",
+            format_decimal(converted),
+            to.code(),
+            to.flag()
+        ),
+        "Open currency-pair chart on Xe.com",
+    );
+    let mut inverse_modifier = Modifier::new().with_subtitle(format!(
+        "{} {} {} ≃ {} {} {}",
+        format_decimal(amount),
+        to.code(),
+        to.flag(),
+        format_decimal(inverted),
+        from.code(),
+        from.flag()
+    ));
+    if default_action == DefaultAction::CopyToClipboard {
+        inverse_modifier =
+            inverse_modifier.with_arg(format!("{} {}", format_decimal(inverted), from.code()));
+    }
     let item = Item::with_arg(
         format!(
             "{} {} {} ≃ {} {} {}",
@@ -169,34 +239,13 @@ fn currency_conversion_item(
             to.code(),
             to.flag()
         ),
-        url.as_str(),
+        actions.default_arg,
     )
     .set_subtitle(exchange_rate_subtitle(rates.date))
     .set_quick_look_url(url.as_str())
     .set_valid(true)
-    .try_set_modifier(
-        [ModifierKey::Alt],
-        Modifier::new().with_subtitle(format!(
-            "{} {} {} ≃ {} {} {}",
-            format_decimal(amount),
-            to.code(),
-            to.flag(),
-            format_decimal(inverted),
-            from.code(),
-            from.flag()
-        )),
-    )?
-    .try_set_modifier(
-        [ModifierKey::Cmd],
-        Modifier::new()
-            .with_subtitle(format!(
-                "Copy {} {} {} to clipboard",
-                format_decimal(converted),
-                to.code(),
-                to.flag()
-            ))
-            .with_arg(format!("{} {}", format_decimal(converted), to.code())),
-    )?;
+    .try_set_modifier([ModifierKey::Alt], inverse_modifier)?
+    .try_set_modifier([ModifierKey::Cmd], actions.command_modifier)?;
     Ok(PendingItem::new(item, Some(to.flag())))
 }
 
@@ -204,17 +253,22 @@ fn currency_conversion_item(
 ///
 /// # Errors
 /// Returns an error if a URL or modifier cannot be built.
-pub fn currency_items(home: Currency, rates: Option<&ExchangeRates>) -> Result<Vec<PendingItem>> {
+pub fn currency_items(
+    home: Currency,
+    default_action: DefaultAction,
+    rates: Option<&ExchangeRates>,
+) -> Result<Vec<PendingItem>> {
     CURRENCIES
         .iter()
         .copied()
-        .map(|currency| currency_catalog_item(currency, home, rates))
+        .map(|currency| currency_catalog_item(currency, home, default_action, rates))
         .collect()
 }
 
 fn currency_catalog_item(
     currency: Currency,
     home: Currency,
+    default_action: DefaultAction,
     rates: Option<&ExchangeRates>,
 ) -> Result<PendingItem> {
     if currency != home
@@ -222,9 +276,34 @@ fn currency_catalog_item(
     {
         let inverse = divide_like_dart(Decimal::ONE, rate)?;
         let url = xe_url(currency, home)?;
+        let actions = result_actions(
+            default_action,
+            url.as_str(),
+            format!("{} {}", format_decimal(rate), home.code()),
+            format!(
+                "Copy {} {} {} to clipboard",
+                format_decimal(rate),
+                home.code(),
+                home.flag()
+            ),
+            "Open currency-pair chart on Xe.com",
+        );
+        let mut inverse_modifier = Modifier::new().with_subtitle(format!(
+            "1 {} ≃ {} {}",
+            home.code(),
+            format_decimal(inverse),
+            currency.code()
+        ));
+        if default_action == DefaultAction::CopyToClipboard {
+            inverse_modifier = inverse_modifier.with_arg(format!(
+                "{} {}",
+                format_decimal(inverse),
+                currency.code()
+            ));
+        }
         let item = Item::with_arg(
             format!("{} ({})", currency.name(), currency.code()),
-            url.as_str(),
+            actions.default_arg,
         )
         .set_subtitle(format!(
             "1 {} ≃ {} {}",
@@ -236,26 +315,8 @@ fn currency_catalog_item(
         .set_match_text(format!("{} ({})", currency.name(), currency.code()))
         .set_text(ItemText::new(currency.code()).with_large_type(currency.code()))
         .set_valid(true)
-        .try_set_modifier(
-            [ModifierKey::Alt],
-            Modifier::new().with_subtitle(format!(
-                "1 {} ≃ {} {}",
-                home.code(),
-                format_decimal(inverse),
-                currency.code()
-            )),
-        )?
-        .try_set_modifier(
-            [ModifierKey::Cmd],
-            Modifier::new()
-                .with_subtitle(format!(
-                    "Copy {} {} {} to clipboard",
-                    format_decimal(rate),
-                    home.code(),
-                    home.flag()
-                ))
-                .with_arg(format!("{} {}", format_decimal(rate), home.code())),
-        )?;
+        .try_set_modifier([ModifierKey::Alt], inverse_modifier)?
+        .try_set_modifier([ModifierKey::Cmd], actions.command_modifier)?;
         return Ok(PendingItem::new(item, Some(currency.flag())));
     }
 
@@ -281,6 +342,34 @@ fn currency_catalog_item(
             .with_arg(format!("{} {}", home.name(), home.code())),
     )?;
     Ok(PendingItem::new(item, Some(currency.flag())))
+}
+
+struct ResultActions {
+    default_arg: String,
+    command_modifier: Modifier,
+}
+
+fn result_actions(
+    default_action: DefaultAction,
+    website_url: &str,
+    copy_arg: String,
+    copy_subtitle: String,
+    website_subtitle: &str,
+) -> ResultActions {
+    match default_action {
+        DefaultAction::OpenWebsite => ResultActions {
+            default_arg: website_url.to_owned(),
+            command_modifier: Modifier::new()
+                .with_subtitle(copy_subtitle)
+                .with_arg(copy_arg),
+        },
+        DefaultAction::CopyToClipboard => ResultActions {
+            default_arg: copy_arg,
+            command_modifier: Modifier::new()
+                .with_subtitle(website_subtitle)
+                .with_arg(website_url),
+        },
+    }
 }
 
 /// Builds Alfred items from Numbat's public unit metadata.

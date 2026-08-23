@@ -1,5 +1,6 @@
 ## 1.3.0-dev
 
+- [FEAT] add separate configurable default actions for monetary and non-monetary results, with Command-Return performing the alternate website or clipboard action
 - [FEAT] migrate the Alfred workflow runtime from Dart to Rust while preserving currency conversion, caching, modifiers, updater behaviour, and existing workflow preferences
 - [FEAT] replace `units_converter` with Numbat, adding native expression support while retaining historical unit aliases, coefficients, formatting, and friendly conversion syntax
 - [FIX] preserve precise ECB currency calculations, offline stale-cache fallback, legacy Dart-cache imports, and TARGET publication-day handling
