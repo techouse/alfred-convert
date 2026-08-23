@@ -1,4 +1,4 @@
-## 1.3.0-dev
+## 1.3.0
 
 - [FEAT] add separate configurable default actions for monetary and non-monetary results, with Command-Return performing the alternate website or clipboard action
 - [FEAT] migrate the Alfred workflow runtime from Dart to Rust while preserving currency conversion, caching, modifiers, updater behaviour, and existing workflow preferences
