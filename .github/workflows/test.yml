@@ -2,6 +2,29 @@ name: Test
 on: [push, pull_request, workflow_call]
 permissions: read-all
 jobs:
+  msrv-meta:
+    name: Read MSRV
+    runs-on: ubuntu-latest
+    outputs:
+      msrv: ${{ steps.read-msrv.outputs.msrv }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: read-msrv
+        name: Read rust-version from Cargo.toml
+        run: |
+          set -euo pipefail
+          msrv="$(
+            awk -F'"' '
+              /^[[:space:]]*\[package\][[:space:]]*$/ { in_package = 1; next }
+              /^[[:space:]]*\[/ { in_package = 0 }
+              in_package && /^[[:space:]]*rust-version[[:space:]]*=/ { print $2; exit }
+            ' Cargo.toml
+          )"
+          if [[ -z "$msrv" ]]; then
+            echo "failed to read package.rust-version from Cargo.toml" >&2
+            exit 1
+          fi
+          echo "msrv=${msrv}" >> "$GITHUB_OUTPUT"
   stable:
     name: Stable Rust checks
     runs-on: macos-latest
@@ -19,11 +42,13 @@ jobs:
       - run: ./scripts/version-check.sh
       - run: make licenses
   msrv:
-    name: MSRV (1.88)
+    name: MSRV (${{ needs.msrv-meta.outputs.msrv }})
+    needs: msrv-meta
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@master
-        with: { toolchain: '1.88.0' }
+        with:
+          toolchain: ${{ needs.msrv-meta.outputs.msrv }}
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --all-targets --all-features --locked
