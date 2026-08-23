@@ -330,14 +330,15 @@ Heavily inspired by [deanishe/alfred-convert](https://github.com/deanishe/alfred
 ## Usage
 
 - `conv &lt;quantity&gt; &lt;from unit&gt; &lt;to unit&gt;` - Perform a conversion
-    - For monetary conversions, &lt;kbd&gt;return&lt;/kbd&gt; (↵) performs the configured Default action: open the currency-pair chart on [Xe.com](http://www.xe.com) or copy the converted value.
+    - For monetary conversions, &lt;kbd&gt;return&lt;/kbd&gt; (↵) performs the configured Default monetary action: open the currency-pair chart on [Xe.com](http://www.xe.com) or copy the converted value.
       - &lt;kbd&gt;cmd+return&lt;/kbd&gt; (⌘↵) performs the alternate action.
       - &lt;kbd&gt;option+return&lt;/kbd&gt; (⌥↵) shows the inverse conversion and copies its value when Copy to clipboard is the default.
       - Quick Look (`⌘Y`) always opens the Xe chart.
-    - When performing a physical unit conversion pressing `⌘Y` or &lt;kbd&gt;return&lt;/kbd&gt; (↵) will open up detailed the conversion
-      explanation on [WolframAlpha.com](https://www.wolframalpha.com).
+    - For physical unit conversions and other Numbat evaluations, &lt;kbd&gt;return&lt;/kbd&gt; (↵) performs the configured Default non-monetary action: open the result on [WolframAlpha.com](https://www.wolframalpha.com) or copy the converted value.
+      - &lt;kbd&gt;cmd+return&lt;/kbd&gt; (⌘↵) performs the alternate action.
+      - Quick Look (`⌘Y`) always opens the WolframAlpha result.
 - `conv money` - View a list of all the supported currencies
-    - Rate-backed rows use the same configured Default action and &lt;kbd&gt;cmd+return&lt;/kbd&gt; (⌘↵) alternate action.
+    - Rate-backed rows use the same configured Default monetary action and &lt;kbd&gt;cmd+return&lt;/kbd&gt; (⌘↵) alternate action.
       - &lt;kbd&gt;option+return&lt;/kbd&gt; (⌥↵) shows the inverse rate and copies it when Copy to clipboard is the default.
       - Quick Look (`⌘Y`) always opens the Xe chart.
 - `conv units` - View a list of all the supported physical units
@@ -551,11 +552,37 @@ Heavily inspired by [deanishe/alfred-convert](https://github.com/deanishe/alfred
 			<key>description</key>
 			<string>Choose what Return does for currency results.</string>
 			<key>label</key>
-			<string>Default action</string>
+			<string>Default monetary action</string>
 			<key>type</key>
 			<string>popupbutton</string>
 			<key>variable</key>
-			<string>default_action</string>
+			<string>default_monetary_action</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>open_website</string>
+				<key>pairs</key>
+				<array>
+					<array>
+						<string>Open website</string>
+						<string>open_website</string>
+					</array>
+					<array>
+						<string>Copy to clipboard</string>
+						<string>copy_to_clipboard</string>
+					</array>
+				</array>
+			</dict>
+			<key>description</key>
+			<string>Choose what Return does for non-monetary results.</string>
+			<key>label</key>
+			<string>Default non-monetary action</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>variable</key>
+			<string>default_non_monetary_action</string>
 		</dict>
 	</array>
 	<key>version</key>

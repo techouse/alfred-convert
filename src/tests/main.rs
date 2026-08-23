@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use alfred_convert::app::CurrencyDefaultAction;
+use alfred_convert::app::DefaultAction;
 use alfred_workflow_rs::{
     AutomaticCache, CheckBoxConfiguration, CheckBoxUserConfiguration, SelectConfiguration,
     SelectUserConfiguration, UserConfiguration, Workflow,
@@ -40,30 +40,36 @@ fn update_item_should_keep_the_update_action() {
 }
 
 #[test]
-fn workflow_settings_should_load_both_select_preferences() -> anyhow::Result<()> {
+fn workflow_settings_should_load_all_select_preferences() -> anyhow::Result<()> {
     let defaults = BTreeMap::from([
         select_configuration("default_currency", "EUR"),
-        select_configuration("default_action", "copy_to_clipboard"),
+        select_configuration("default_monetary_action", "copy_to_clipboard"),
+        select_configuration("default_non_monetary_action", "open_website"),
     ]);
     let settings = workflow_settings_from_defaults(&defaults)?;
     assert_eq!(
         (
             settings.home_currency.code(),
-            settings.currency_default_action
+            settings.default_monetary_action,
+            settings.default_non_monetary_action,
         ),
-        ("EUR", CurrencyDefaultAction::CopyToClipboard)
+        (
+            "EUR",
+            DefaultAction::CopyToClipboard,
+            DefaultAction::OpenWebsite,
+        )
     );
     Ok(())
 }
 
 #[test]
-fn workflow_settings_should_ignore_wrong_action_configuration_type() -> anyhow::Result<()> {
+fn workflow_settings_should_fall_back_for_wrong_action_configuration_type() -> anyhow::Result<()> {
     let defaults = BTreeMap::from([
         select_configuration("default_currency", "USD"),
         (
-            "default_action".to_owned(),
+            "default_monetary_action".to_owned(),
             UserConfiguration::CheckBox(CheckBoxUserConfiguration {
-                variable: "default_action".to_owned(),
+                variable: "default_monetary_action".to_owned(),
                 description: None,
                 label: None,
                 config: CheckBoxConfiguration {
@@ -74,11 +80,33 @@ fn workflow_settings_should_ignore_wrong_action_configuration_type() -> anyhow::
                 },
             }),
         ),
+        select_configuration("default_non_monetary_action", "copy_to_clipboard"),
     ]);
     let settings = workflow_settings_from_defaults(&defaults)?;
     assert_eq!(
-        settings.currency_default_action,
-        CurrencyDefaultAction::OpenWebsite
+        (
+            settings.default_monetary_action,
+            settings.default_non_monetary_action,
+        ),
+        (DefaultAction::OpenWebsite, DefaultAction::CopyToClipboard,)
+    );
+    Ok(())
+}
+
+#[test]
+fn workflow_settings_should_ignore_obsolete_and_unknown_action_values() -> anyhow::Result<()> {
+    let defaults = BTreeMap::from([
+        select_configuration("default_currency", "USD"),
+        select_configuration("default_action", "copy_to_clipboard"),
+        select_configuration("default_non_monetary_action", "unexpected"),
+    ]);
+    let settings = workflow_settings_from_defaults(&defaults)?;
+    assert_eq!(
+        (
+            settings.default_monetary_action,
+            settings.default_non_monetary_action,
+        ),
+        (DefaultAction::OpenWebsite, DefaultAction::OpenWebsite)
     );
     Ok(())
 }

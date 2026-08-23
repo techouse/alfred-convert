@@ -6,8 +6,8 @@ use std::process::ExitCode;
 use std::time::Duration;
 
 use alfred_convert::app::{
-    CurrencyDefaultAction, PendingItem, conversion_item, currency_items, invalid_item,
-    placeholder_item, unit_items,
+    DefaultAction, PendingItem, conversion_item, currency_items, invalid_item, placeholder_item,
+    unit_items,
 };
 use alfred_convert::cli::Cli;
 use alfred_convert::currency::{Currency, EcbClient, ExchangeRateCache};
@@ -75,7 +75,7 @@ fn populate_workflow(workflow: &mut Workflow, cli: &Cli) -> Result<()> {
             workflow,
             currency_items(
                 settings.home_currency,
-                settings.currency_default_action,
+                settings.default_monetary_action,
                 rates.as_ref(),
             )?,
             &directory,
@@ -106,7 +106,8 @@ fn populate_workflow(workflow: &mut Workflow, cli: &Cli) -> Result<()> {
     let item = conversion_item(
         &query,
         settings.home_currency,
-        settings.currency_default_action,
+        settings.default_monetary_action,
+        settings.default_non_monetary_action,
         rates.as_ref(),
         &mut unit_engine,
     )?;
@@ -161,7 +162,8 @@ fn add_pending_items(
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct WorkflowSettings {
     home_currency: Currency,
-    currency_default_action: CurrencyDefaultAction,
+    default_monetary_action: DefaultAction,
+    default_non_monetary_action: DefaultAction,
 }
 
 fn workflow_settings(workflow: &Workflow, directory: &Path) -> Result<WorkflowSettings> {
@@ -181,13 +183,18 @@ fn workflow_settings_from_defaults(
         .and_then(Currency::from_code)
         .or_else(|| Currency::from_code("USD"))
         .ok_or_else(|| anyhow!("USD currency metadata is missing"))?;
-    let configured_action = match defaults.get("default_action") {
+    let configured_monetary_action = match defaults.get("default_monetary_action") {
+        Some(UserConfiguration::Select(configuration)) => Some(configuration.config.value.as_str()),
+        _ => None,
+    };
+    let configured_non_monetary_action = match defaults.get("default_non_monetary_action") {
         Some(UserConfiguration::Select(configuration)) => Some(configuration.config.value.as_str()),
         _ => None,
     };
     Ok(WorkflowSettings {
         home_currency,
-        currency_default_action: CurrencyDefaultAction::from_preference(configured_action),
+        default_monetary_action: DefaultAction::from_preference(configured_monetary_action),
+        default_non_monetary_action: DefaultAction::from_preference(configured_non_monetary_action),
     })
 }
 

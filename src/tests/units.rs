@@ -198,7 +198,10 @@ fn legacy_shorthand_should_be_evaluated_by_numbat() -> anyhow::Result<()> {
     let conversion = legacy_conversion("10 mi km")
         .ok_or_else(|| anyhow::anyhow!("legacy conversion missing"))?;
     let result = engine.evaluate_legacy(conversion)?;
-    assert_eq!(result.result, "10 mi = 16.093 km");
+    assert_eq!(
+        (result.result.as_str(), result.copy_value.as_str()),
+        ("10 mi = 16.093 km", "16.093 km")
+    );
     assert_eq!(
         result.legacy_fact.as_deref(),
         Some("Based on the fact that 1 mi = 1.609 km")
@@ -299,7 +302,10 @@ fn kilogram_force_torque_should_keep_the_dart_coefficient() -> anyhow::Result<()
 fn native_numbat_syntax_should_pass_through_unchanged() -> anyhow::Result<()> {
     let mut engine = UnitEngine::new()?;
     let result = engine.evaluate_native("2in to cm")?;
-    assert_eq!(result.result, "5.08 cm");
+    assert_eq!(
+        (result.result.as_str(), result.copy_value.as_str()),
+        ("5.08 cm", "5.08 cm")
+    );
     Ok(())
 }
 

@@ -1,7 +1,8 @@
 use crate::app::{
-    CurrencyDefaultAction, conversion_item, currency_items, invalid_item, placeholder_item,
+    DefaultAction, conversion_item, currency_items, invalid_item, placeholder_item, unit_items,
 };
 use crate::currency::{Currency, ExchangeRates};
+use crate::units::UnitListing;
 use jiff::Timestamp;
 use rust_decimal::Decimal;
 
@@ -25,12 +26,29 @@ fn native_numbat_query_should_not_require_a_separate_numeric_token() -> anyhow::
     let pending = conversion_item(
         "2in to cm",
         home,
-        CurrencyDefaultAction::OpenWebsite,
+        DefaultAction::OpenWebsite,
+        DefaultAction::OpenWebsite,
         None,
         &mut engine,
     )?;
     let item = pending.into_item(None);
-    assert_eq!(item.title(), "2in to cm = 5.08 cm");
+    let command = item.modifiers().and_then(|modifiers| modifiers.get("cmd"));
+    assert_eq!(
+        (
+            item.title(),
+            item.arg(),
+            item.quick_look_url(),
+            command.and_then(alfred_workflow_rs::Modifier::arg),
+            command.and_then(alfred_workflow_rs::Modifier::subtitle),
+        ),
+        (
+            "2in to cm = 5.08 cm",
+            Some("https://www.wolframalpha.com/input?i=2in+to+cm"),
+            Some("https://www.wolframalpha.com/input?i=2in+to+cm"),
+            Some("5.08 cm"),
+            Some("Copy 5.08 cm to clipboard"),
+        )
+    );
     Ok(())
 }
 
@@ -41,7 +59,8 @@ fn legacy_symbol_should_be_used_in_item_and_wolfram_action() -> anyhow::Result<(
     let item = conversion_item(
         "60 ' deg",
         home,
-        CurrencyDefaultAction::OpenWebsite,
+        DefaultAction::OpenWebsite,
+        DefaultAction::OpenWebsite,
         None,
         &mut engine,
     )?
@@ -54,12 +73,28 @@ fn legacy_symbol_should_be_used_in_item_and_wolfram_action() -> anyhow::Result<(
                 .find(|(name, _)| name == "i")
                 .map(|(_, value)| value.into_owned())
         });
+    let command_arg = item
+        .modifiers()
+        .and_then(|modifiers| modifiers.get("cmd"))
+        .and_then(alfred_workflow_rs::Modifier::arg);
+    let command_subtitle = item
+        .modifiers()
+        .and_then(|modifiers| modifiers.get("cmd"))
+        .and_then(alfred_workflow_rs::Modifier::subtitle);
     assert_eq!(
-        (item.title(), item.subtitle(), wolfram_query.as_deref()),
+        (
+            item.title(),
+            item.subtitle(),
+            wolfram_query.as_deref(),
+            command_arg,
+            command_subtitle,
+        ),
         (
             "60 ' = 1 °",
             Some("Based on the fact that 1 ' = 0.017 °"),
-            Some("60.0 ' to °")
+            Some("60.0 ' to °"),
+            Some("1 °"),
+            Some("Copy 1 ° to clipboard"),
         )
     );
     Ok(())
@@ -73,7 +108,8 @@ fn trailing_currency_tokens_should_be_rejected_instead_of_ignored() -> anyhow::R
     let pending = conversion_item(
         "10 EUR USD ignored",
         home,
-        CurrencyDefaultAction::OpenWebsite,
+        DefaultAction::OpenWebsite,
+        DefaultAction::CopyToClipboard,
         Some(&rates),
         &mut engine,
     )?;
@@ -88,7 +124,8 @@ fn malformed_currency_amount_should_not_initialize_numbat() -> anyhow::Result<()
     let pending = conversion_item(
         "abc USD EUR",
         home,
-        CurrencyDefaultAction::OpenWebsite,
+        DefaultAction::OpenWebsite,
+        DefaultAction::CopyToClipboard,
         None,
         &mut engine,
     )?;
@@ -106,7 +143,8 @@ fn currency_item_should_open_xe_by_default_and_copy_with_command() -> anyhow::Re
     let item = conversion_item(
         "10 EUR USD",
         home,
-        CurrencyDefaultAction::OpenWebsite,
+        DefaultAction::OpenWebsite,
+        DefaultAction::CopyToClipboard,
         Some(&rates),
         &mut engine,
     )?
@@ -146,7 +184,8 @@ fn currency_item_should_copy_by_default_and_open_xe_with_command() -> anyhow::Re
     let item = conversion_item(
         "10 EUR USD",
         home,
-        CurrencyDefaultAction::CopyToClipboard,
+        DefaultAction::CopyToClipboard,
+        DefaultAction::OpenWebsite,
         Some(&rates),
         &mut engine,
     )?
@@ -189,7 +228,7 @@ fn currency_item_should_copy_by_default_and_open_xe_with_command() -> anyhow::Re
 fn currency_catalogue_should_open_xe_by_default_and_copy_with_command() -> anyhow::Result<()> {
     let items = currency_items(
         currency("USD")?,
-        CurrencyDefaultAction::OpenWebsite,
+        DefaultAction::OpenWebsite,
         Some(&sample_rates()?),
     )?;
     let item = items
@@ -223,7 +262,7 @@ fn currency_catalogue_should_open_xe_by_default_and_copy_with_command() -> anyho
 fn currency_catalogue_should_apply_copy_default_to_rate_backed_rows() -> anyhow::Result<()> {
     let items = currency_items(
         currency("USD")?,
-        CurrencyDefaultAction::CopyToClipboard,
+        DefaultAction::CopyToClipboard,
         Some(&sample_rates()?),
     )?;
     let item = items
@@ -267,11 +306,7 @@ fn currency_catalogue_should_apply_copy_default_to_rate_backed_rows() -> anyhow:
 
 #[test]
 fn currency_catalogue_should_keep_oanda_fallback_in_copy_mode() -> anyhow::Result<()> {
-    let items = currency_items(
-        currency("USD")?,
-        CurrencyDefaultAction::CopyToClipboard,
-        None,
-    )?;
+    let items = currency_items(currency("USD")?, DefaultAction::CopyToClipboard, None)?;
     let item = items
         .into_iter()
         .map(|pending| pending.into_item(None))
@@ -292,53 +327,138 @@ fn currency_catalogue_should_keep_oanda_fallback_in_copy_mode() -> anyhow::Resul
 }
 
 #[test]
-fn currency_default_action_should_fall_back_to_open_website() {
+fn default_action_should_fall_back_to_open_website() {
     assert_eq!(
         (
-            CurrencyDefaultAction::default(),
-            CurrencyDefaultAction::from_preference(None),
-            CurrencyDefaultAction::from_preference(Some("unexpected")),
+            DefaultAction::default(),
+            DefaultAction::from_preference(None),
+            DefaultAction::from_preference(Some("unexpected")),
         ),
         (
-            CurrencyDefaultAction::OpenWebsite,
-            CurrencyDefaultAction::OpenWebsite,
-            CurrencyDefaultAction::OpenWebsite,
+            DefaultAction::OpenWebsite,
+            DefaultAction::OpenWebsite,
+            DefaultAction::OpenWebsite,
         )
     );
 }
 
 #[test]
-fn currency_default_action_should_parse_open_website_preference() {
+fn default_action_should_parse_open_website_preference() {
     assert_eq!(
-        CurrencyDefaultAction::from_preference(Some("open_website")),
-        CurrencyDefaultAction::OpenWebsite
+        DefaultAction::from_preference(Some("open_website")),
+        DefaultAction::OpenWebsite
     );
 }
 
 #[test]
-fn currency_default_action_should_parse_copy_preference() {
+fn default_action_should_parse_copy_preference() {
     assert_eq!(
-        CurrencyDefaultAction::from_preference(Some("copy_to_clipboard")),
-        CurrencyDefaultAction::CopyToClipboard
+        DefaultAction::from_preference(Some("copy_to_clipboard")),
+        DefaultAction::CopyToClipboard
     );
 }
 
 #[test]
-fn unit_conversion_should_keep_its_wolfram_action() -> anyhow::Result<()> {
+fn native_unit_conversion_should_copy_only_the_value_by_default() -> anyhow::Result<()> {
     let home = currency("USD")?;
     let mut engine = None;
     let item = conversion_item(
         "2in to cm",
         home,
-        CurrencyDefaultAction::CopyToClipboard,
+        DefaultAction::OpenWebsite,
+        DefaultAction::CopyToClipboard,
+        None,
+        &mut engine,
+    )?
+    .into_item(None);
+    let command = item.modifiers().and_then(|modifiers| modifiers.get("cmd"));
+    assert_eq!(
+        (
+            item.title(),
+            item.arg(),
+            item.quick_look_url(),
+            command.and_then(alfred_workflow_rs::Modifier::arg),
+            command.and_then(alfred_workflow_rs::Modifier::subtitle),
+        ),
+        (
+            "2in to cm = 5.08 cm",
+            Some("5.08 cm"),
+            Some("https://www.wolframalpha.com/input?i=2in+to+cm"),
+            Some("https://www.wolframalpha.com/input?i=2in+to+cm"),
+            Some("Open evaluation details on WolframAlpha.com"),
+        )
+    );
+    Ok(())
+}
+
+#[test]
+fn legacy_unit_conversion_should_copy_only_the_value_by_default() -> anyhow::Result<()> {
+    let home = currency("USD")?;
+    let mut engine = None;
+    let item = conversion_item(
+        "10 mi km",
+        home,
+        DefaultAction::OpenWebsite,
+        DefaultAction::CopyToClipboard,
+        None,
+        &mut engine,
+    )?
+    .into_item(None);
+    let command = item.modifiers().and_then(|modifiers| modifiers.get("cmd"));
+    assert_eq!(
+        (
+            item.title(),
+            item.subtitle(),
+            item.arg(),
+            item.quick_look_url(),
+            command.and_then(alfred_workflow_rs::Modifier::arg),
+            command.and_then(alfred_workflow_rs::Modifier::subtitle),
+        ),
+        (
+            "10 mi = 16.093 km",
+            Some("Based on the fact that 1 mi = 1.609 km"),
+            Some("16.093 km"),
+            Some("https://www.wolframalpha.com/input?i=10.0+mi+to+km"),
+            Some("https://www.wolframalpha.com/input?i=10.0+mi+to+km"),
+            Some("Open conversion details on WolframAlpha.com"),
+        )
+    );
+    Ok(())
+}
+
+#[test]
+fn invalid_unit_expression_should_not_receive_result_actions() -> anyhow::Result<()> {
+    let home = currency("USD")?;
+    let mut engine = None;
+    let item = conversion_item(
+        "not a valid expression",
+        home,
+        DefaultAction::CopyToClipboard,
+        DefaultAction::CopyToClipboard,
         None,
         &mut engine,
     )?
     .into_item(None);
     assert_eq!(
-        (item.arg(), item.modifiers()),
-        (Some("https://www.wolframalpha.com/input?i=2in+to+cm"), None,)
+        (item.title(), item.arg(), item.modifiers()),
+        ("Invalid format.", None, None)
     );
+    Ok(())
+}
+
+#[test]
+fn unit_catalogue_should_keep_copying_the_identifier() -> anyhow::Result<()> {
+    let item = unit_items(&[UnitListing {
+        identifier: "metre".to_owned(),
+        name: "meter".to_owned(),
+        dimension: "Length".to_owned(),
+        aliases: vec!["m".to_owned()],
+    }])
+    .into_iter()
+    .next()
+    .ok_or_else(|| anyhow::anyhow!("unit catalogue item missing"))?
+    .into_item(None);
+    assert_eq!((item.arg(), item.modifiers()), (Some("metre"), None));
     Ok(())
 }
 
