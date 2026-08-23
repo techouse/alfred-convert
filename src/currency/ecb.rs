@@ -183,7 +183,7 @@ fn parse_exchange_rates(
         .and_then(|value| rfc2822::parse(value).ok())
         .map(|value| value.timestamp())
         .or_else(|| source_date.and_then(|date| midnight_utc(date).ok()))
-        .unwrap_or(now);
+        .map_or_else(|| midnight_utc(now.to_zoned(TimeZone::UTC).date()), Ok)?;
     Ok(ExchangeRates { date, rates })
 }
 
