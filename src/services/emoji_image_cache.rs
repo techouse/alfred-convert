@@ -97,12 +97,6 @@ impl EmojiImageCache {
         if self.valid_cached_image(&target) {
             return Some(target);
         }
-        if Instant::now() >= deadline {
-            self.log(format!(
-                "skipping {emoji} because the image batch deadline elapsed"
-            ));
-            return None;
-        }
         let image_url = match self.base_url.join(&filename) {
             Ok(url) => url,
             Err(error) => {
@@ -110,7 +104,16 @@ impl EmojiImageCache {
                 return None;
             }
         };
-        let bytes = match self.download(&image_url) {
+        let Some(remaining) = deadline
+            .checked_duration_since(Instant::now())
+            .filter(|remaining| !remaining.is_zero())
+        else {
+            self.log(format!(
+                "skipping {emoji} because the image batch deadline elapsed"
+            ));
+            return None;
+        };
+        let bytes = match self.download(&image_url, remaining.min(IMAGE_TIMEOUT)) {
             Ok(bytes) => bytes,
             Err(error) => {
                 self.log(format!("could not download image for {emoji}: {error}"));
@@ -124,7 +127,7 @@ impl EmojiImageCache {
         Some(target)
     }
 
-    fn download(&self, url: &Url) -> Result<Vec<u8>> {
+    fn download(&self, url: &Url, timeout: Duration) -> Result<Vec<u8>> {
         #[cfg(test)]
         if let Some(fetcher) = &self.test_fetcher {
             return fetcher(url);
@@ -132,6 +135,9 @@ impl EmojiImageCache {
         let mut response = self
             .agent
             .get(url.as_str())
+            .config()
+            .timeout_global(Some(timeout))
+            .build()
             .call()
             .map_err(|error| anyhow!("image request failed: {error}"))?;
         let bytes = response
@@ -217,6 +223,25 @@ impl EmojiImageCache {
             diagnostic,
             batch_budget: BATCH_BUDGET,
             test_fetcher: Some(fetcher),
+        })
+    }
+
+    #[cfg(test)]
+    fn with_test_endpoint(
+        directory: PathBuf,
+        base_url: Url,
+        batch_budget: Duration,
+    ) -> Result<Self> {
+        let pool = ThreadPoolBuilder::new().num_threads(2).build()?;
+        Ok(Self {
+            directory,
+            base_url,
+            agent: platform_agent(CONNECT_TIMEOUT, IMAGE_TIMEOUT),
+            pool,
+            verbose: true,
+            diagnostic: Arc::new(|_| {}),
+            batch_budget,
+            test_fetcher: None,
         })
     }
 }
