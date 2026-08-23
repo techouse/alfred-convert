@@ -1,4 +1,4 @@
-## 1.3.1-dev
+## 1.3.1
 
 - [FEAT] add explicit UK/US customary aliases for cross-system unit conversions
 - [FEAT] add an Imperial/US customary preference for ambiguous legacy unit shorthand
