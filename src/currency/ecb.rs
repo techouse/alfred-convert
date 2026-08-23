@@ -1,7 +1,7 @@
 use std::io::Read;
 use std::time::Duration;
 
-use anyhow::{Context, Result, anyhow, bail};
+use anyhow::{Context, Result, bail};
 use jiff::civil::{Date, Weekday};
 use jiff::fmt::rfc2822;
 use jiff::tz::TimeZone;
@@ -147,10 +147,7 @@ pub fn should_refresh(cached_at: Timestamp, now: Timestamp) -> Result<bool> {
 
     let brussels = now.to_zoned(TimeZone::get("Europe/Brussels")?);
     let date = brussels.date();
-    if matches!(date.weekday(), Weekday::Saturday | Weekday::Sunday)
-        || is_fixed_holiday(date)
-        || is_easter_holiday(date)?
-    {
+    if is_target_closing_day(date)? {
         return Ok(false);
     }
     Ok(brussels.hour() > 16 || (brussels.hour() == 16 && brussels.minute() > 0))
@@ -227,33 +224,17 @@ fn is_fixed_holiday(date: Date) -> bool {
     matches!((date.month(), date.day()), (1 | 5, 1) | (12, 25 | 26))
 }
 
-fn is_easter_holiday(date: Date) -> Result<bool> {
-    let easter = gregorian_easter(date.year())?;
-    Ok(date == easter.checked_sub(2.days())? || date == easter.checked_add(1.day())?)
+fn is_target_closing_day(date: Date) -> Result<bool> {
+    Ok(
+        matches!(date.weekday(), Weekday::Saturday | Weekday::Sunday)
+            || is_fixed_holiday(date)
+            || is_easter_holiday(date)?,
+    )
 }
 
-#[allow(clippy::many_single_char_names)]
-fn gregorian_easter(year: i16) -> Result<Date> {
-    let year = i32::from(year);
-    let a = year % 19;
-    let b = year / 100;
-    let c = year % 100;
-    let d = b / 4;
-    let e = b % 4;
-    let f = (b + 8) / 25;
-    let g = (b - f + 1) / 3;
-    let h = (19 * a + b - d - g + 15) % 30;
-    let i = c / 4;
-    let k = c % 4;
-    let l = (32 + 2 * e + 2 * i - h - k) % 7;
-    let m = (a + 11 * h + 22 * l) / 451;
-    let month = (h + l - 7 * m + 114) / 31;
-    let day = (h + l - 7 * m + 114) % 31 + 1;
-    Ok(Date::new(
-        i16::try_from(year).map_err(|_| anyhow!("Easter year is out of range"))?,
-        i8::try_from(month).map_err(|_| anyhow!("Easter month is out of range"))?,
-        i8::try_from(day).map_err(|_| anyhow!("Easter day is out of range"))?,
-    )?)
+fn is_easter_holiday(date: Date) -> Result<bool> {
+    let easter = computus::gregorian_jiff_date(i32::from(date.year()))?;
+    Ok(date == easter.checked_sub(2.days())? || date == easter.checked_add(1.day())?)
 }
 
 #[cfg(test)]

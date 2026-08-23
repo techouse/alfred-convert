@@ -25,6 +25,7 @@ version = "1.2.7"
 dependencies = [
  "alfred_workflow_rs",
  "anyhow",
+ "computus",
  "flate2",
  "jiff",
  "numbat",
@@ -264,6 +265,15 @@ dependencies = [
  "ryu",
  "serde",
  "static_assertions",
+]
+
+[[package]]
+name = "computus"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9d56aeb738697ce53b59ab5a09acf957bc90a0d750c67f0899a796ed15d7e807"
+dependencies = [
+ "jiff",
 ]
 
 [[package]]
