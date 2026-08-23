@@ -67,9 +67,7 @@ fn zero_byte_cache_entry_should_be_replaced_atomically() -> anyhow::Result<()> {
     );
     assert!(!std::fs::read(target)?.is_empty());
     assert!(std::fs::read_dir(directory.path())?.all(|entry| {
-        entry
-            .ok()
-            .is_some_and(|entry| !entry.file_name().to_string_lossy().ends_with(".tmp"))
+        entry.is_ok_and(|entry| !entry.file_name().to_string_lossy().ends_with(".tmp"))
     }));
     Ok(())
 }
