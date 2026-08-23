@@ -14,8 +14,7 @@ Heavily inspired by [deanishe/alfred-convert](https://github.com/deanishe/alfred
 
 1. [Download the latest version](https://github.com/techouse/alfred-convert/releases/latest)
 2. Install the workflow by double-clicking the `.alfredworkflow` file
-3. You can add the workflow to a category, then click "Import" to finish importing. You'll now see the workflow listed
-   in the left sidebar of your Workflows preferences pane.
+3. You can add the workflow to a category, then click "Import" to finish importing. You'll now see the workflow listed in the left sidebar of your Workflows preferences pane.
 
 ## Usage
 
@@ -40,8 +39,7 @@ In order to set a default currency, you can set it in the Workflow Configuration
 
 ![default_currency](default_currency.png)
 
-Valid values are the [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency codes: AUD, BRL, CAD, CHF, CNY, CZK, 
-DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, ISK, JPY, KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, TRY, USD, ZAR.
+Valid values are the [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency codes: AUD, BRL, CAD, CHF, CNY, CZK, DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, ISK, JPY, KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, TRY, USD, ZAR.
 
 ### Default customary units
 
@@ -55,9 +53,7 @@ The Workflow Configuration provides separate Default monetary action and Default
 
 ### Notes
 
-- All [the reference exchange rates are from the ECB](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html).
-  The reference rates are usually updated around 16:00 CET on every working day, except
-  on [TARGET closing days](https://www.ecb.europa.eu/home/contacts/working-hours/html/index.en.html).
+- All [the reference exchange rates are from the ECB](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html). The reference rates are usually updated around 16:00 CET on every working day, except on [TARGET closing days](https://www.ecb.europa.eu/home/contacts/working-hours/html/index.en.html).
 
 - Non-monetary conversions are evaluated by [Numbat](https://numbat.dev/). Native Numbat expressions such as `2in to cm`, arithmetic, constants, and compound units are supported alongside the workflow's historical shorthand.
 
@@ -73,6 +69,4 @@ cargo install cargo-about --locked --features cli
 make ci
 ```
 
-`make build-release` creates a native development build. `make package` builds
-both Apple Silicon and Intel slices and creates a universal `.alfredworkflow`
-archive under `build/`.
+`make build-release` creates a native development build. `make package` builds both Apple Silicon and Intel slices and creates a universal `.alfredworkflow` archive under `build/`.
