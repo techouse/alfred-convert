@@ -273,8 +273,8 @@ fn currency_catalog_item(
 ) -> Result<PendingItem> {
     if currency != home
         && let Some(rate) = rates.and_then(|rates| rates.pair_rate(currency, home).ok())
+        && let Ok(inverse) = divide_like_dart(Decimal::ONE, rate)
     {
-        let inverse = divide_like_dart(Decimal::ONE, rate)?;
         let url = xe_url(currency, home)?;
         let actions = result_actions(
             default_action,

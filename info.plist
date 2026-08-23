@@ -229,12 +229,6 @@
 				<string>Working ...</string>
 				<key>script</key>
 				<string>case "{query}" in
-	"money")
-		./workflow -C
-		;;
-	"units")
-		./workflow -U
-		;;
 	"update:workflow")
 		./workflow -u
 		;;

@@ -7,8 +7,8 @@ use alfred_workflow_rs::{
 };
 
 use super::{
-    query_requires_exchange_rates, replace_items_with_runtime_error, update_item,
-    workflow_settings_from_defaults,
+    Catalogue, catalogue_mode, query_requires_exchange_rates, replace_items_with_runtime_error,
+    update_item, workflow_settings_from_defaults,
 };
 
 #[test]
@@ -28,6 +28,84 @@ fn valid_currency_query_should_require_exchange_rates() {
 #[test]
 fn malformed_currency_amount_should_not_require_exchange_rates() {
     assert!(!query_requires_exchange_rates("abc USD EUR"));
+}
+
+#[test]
+fn normalized_money_query_should_select_the_currency_catalogue() {
+    let cli = super::Cli {
+        query: "  money\t".to_owned(),
+        ..super::Cli::default()
+    };
+    assert_eq!(
+        catalogue_mode(&cli, &cli.normalized_query()),
+        Some(Catalogue::Currencies)
+    );
+}
+
+#[test]
+fn units_query_should_select_the_unit_catalogue() {
+    let cli = super::Cli {
+        query: "units".to_owned(),
+        ..super::Cli::default()
+    };
+    assert_eq!(
+        catalogue_mode(&cli, &cli.normalized_query()),
+        Some(Catalogue::Units)
+    );
+}
+
+#[test]
+fn capitalized_money_query_should_remain_a_conversion_query() {
+    let cli = super::Cli {
+        query: "Money".to_owned(),
+        ..super::Cli::default()
+    };
+    assert_eq!(catalogue_mode(&cli, &cli.normalized_query()), None);
+}
+
+#[test]
+fn conversion_query_should_remain_outside_catalogues() {
+    let cli = super::Cli {
+        query: "10 USD EUR".to_owned(),
+        ..super::Cli::default()
+    };
+    assert_eq!(catalogue_mode(&cli, &cli.normalized_query()), None);
+}
+
+#[test]
+fn explicit_units_flag_should_override_money_query_keyword() {
+    let cli = super::Cli {
+        query: "money".to_owned(),
+        units: true,
+        ..super::Cli::default()
+    };
+    assert_eq!(
+        catalogue_mode(&cli, &cli.normalized_query()),
+        Some(Catalogue::Units)
+    );
+}
+
+#[test]
+fn currencies_flag_should_override_units_query_keyword() {
+    let cli = super::Cli {
+        query: "units".to_owned(),
+        currencies: true,
+        ..super::Cli::default()
+    };
+    assert_eq!(
+        catalogue_mode(&cli, &cli.normalized_query()),
+        Some(Catalogue::Currencies)
+    );
+}
+
+#[test]
+fn currencies_flag_should_retain_precedence_over_units_flag() {
+    let cli = super::Cli {
+        currencies: true,
+        units: true,
+        ..super::Cli::default()
+    };
+    assert_eq!(catalogue_mode(&cli, ""), Some(Catalogue::Currencies));
 }
 
 #[test]

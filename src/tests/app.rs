@@ -327,6 +327,28 @@ fn currency_catalogue_should_keep_oanda_fallback_in_copy_mode() -> anyhow::Resul
 }
 
 #[test]
+fn currency_catalogue_should_fall_back_when_a_small_rate_rounds_to_zero() -> anyhow::Result<()> {
+    let rates = ExchangeRates {
+        date: "2026-08-21T14:00:00Z".parse::<Timestamp>()?,
+        rates: std::collections::BTreeMap::from([
+            ("EUR".to_owned(), Decimal::ONE),
+            ("USD".to_owned(), Decimal::new(11_699, 4)),
+            ("IDR".to_owned(), Decimal::new(2_065_938, 2)),
+        ]),
+    };
+    let item = currency_items(currency("USD")?, DefaultAction::OpenWebsite, Some(&rates))?
+        .into_iter()
+        .map(|pending| pending.into_item(None))
+        .find(|item| item.title() == "Indonesian rupiah (IDR)")
+        .ok_or_else(|| anyhow::anyhow!("IDR catalogue item missing"))?;
+    assert_eq!(
+        item.arg(),
+        Some("https://www.oanda.com/currency-converter/en/currencies/majors/idr/")
+    );
+    Ok(())
+}
+
+#[test]
 fn default_action_should_fall_back_to_open_website() {
     assert_eq!(
         (

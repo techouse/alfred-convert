@@ -69,27 +69,31 @@ fn populate_workflow(workflow: &mut Workflow, cli: &Cli) -> Result<()> {
     let directory = workflow_directory()?;
     let settings = workflow_settings(workflow, &directory)?;
 
-    if cli.currencies {
-        let rates = latest_rates(&directory, cli.verbose)?;
-        return add_pending_items(
-            workflow,
-            currency_items(
-                settings.home_currency,
-                settings.default_monetary_action,
-                rates.as_ref(),
-            )?,
-            &directory,
-            cli.verbose,
-        );
-    }
-    if cli.units {
-        let engine = UnitEngine::new()?;
-        return add_pending_items(
-            workflow,
-            unit_items(&engine.listings()),
-            &directory,
-            cli.verbose,
-        );
+    if let Some(catalogue) = catalogue_mode(cli, &query) {
+        return match catalogue {
+            Catalogue::Currencies => {
+                let rates = latest_rates(&directory, cli.verbose)?;
+                add_pending_items(
+                    workflow,
+                    currency_items(
+                        settings.home_currency,
+                        settings.default_monetary_action,
+                        rates.as_ref(),
+                    )?,
+                    &directory,
+                    cli.verbose,
+                )
+            }
+            Catalogue::Units => {
+                let engine = UnitEngine::new()?;
+                add_pending_items(
+                    workflow,
+                    unit_items(&engine.listings()),
+                    &directory,
+                    cli.verbose,
+                )
+            }
+        };
     }
     if query.is_empty() {
         workflow.add_item(placeholder_item())?;
@@ -112,6 +116,26 @@ fn populate_workflow(workflow: &mut Workflow, cli: &Cli) -> Result<()> {
         &mut unit_engine,
     )?;
     add_pending_items(workflow, vec![item], &directory, cli.verbose)
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum Catalogue {
+    Currencies,
+    Units,
+}
+
+fn catalogue_mode(cli: &Cli, query: &str) -> Option<Catalogue> {
+    if cli.currencies {
+        Some(Catalogue::Currencies)
+    } else if cli.units {
+        Some(Catalogue::Units)
+    } else {
+        match query {
+            "money" => Some(Catalogue::Currencies),
+            "units" => Some(Catalogue::Units),
+            _ => None,
+        }
+    }
 }
 
 fn query_requires_exchange_rates(query: &str) -> bool {

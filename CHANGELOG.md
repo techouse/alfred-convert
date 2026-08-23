@@ -6,6 +6,7 @@
 - [FIX] preserve precise ECB currency calculations, offline stale-cache fallback, legacy Dart-cache imports, and TARGET publication-day handling
 - [FIX] validate and atomically cache JoyPixels assets, remove invalid downloads, and bound concurrent image-fetch latency
 - [FIX] keep verbose and updater diagnostics from replacing valid Alfred JSON results, and reject malformed currency queries instead of ignoring trailing input
+- [FIX] restore `conv money` catalogue rendering and fall back to Oanda for rates too small to invert after legacy rounding
 - [CHORE] replace Dart build and release tooling with Rust CI, Cargo-derived MSRV checks, third-party license generation, and signed universal macOS packaging
 
 ## 1.2.7
