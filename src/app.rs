@@ -11,7 +11,9 @@ use url::Url;
 
 use crate::currency::{CURRENCIES, Currency, ExchangeRates, divide_like_dart};
 use crate::format::{format_decimal, parse_decimal};
-use crate::units::{UnitEngine, UnitListing, legacy_conversion};
+use crate::units::{
+    CustomarySystem, UnitEngine, UnitListing, legacy_conversion_with_customary_system,
+};
 
 const MONTHS: [&str; 12] = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
@@ -93,6 +95,32 @@ pub fn conversion_item(
     rates: Option<&ExchangeRates>,
     unit_engine: &mut Option<UnitEngine>,
 ) -> Result<PendingItem> {
+    conversion_item_with_customary_system(
+        query,
+        home,
+        monetary_default_action,
+        non_monetary_default_action,
+        CustomarySystem::default(),
+        rates,
+        unit_engine,
+    )
+}
+
+/// Converts a query using the selected customary system for legacy shorthand.
+///
+/// Native Numbat expressions and explicit unit identifiers are never rewritten.
+///
+/// # Errors
+/// Returns an error only when Alfred item metadata cannot be constructed.
+pub fn conversion_item_with_customary_system(
+    query: &str,
+    home: Currency,
+    monetary_default_action: DefaultAction,
+    non_monetary_default_action: DefaultAction,
+    customary_system: CustomarySystem,
+    rates: Option<&ExchangeRates>,
+    unit_engine: &mut Option<UnitEngine>,
+) -> Result<PendingItem> {
     let parts = query.split(' ').collect::<Vec<_>>();
     if let Some(from) = parts.get(1).and_then(|part| Currency::from_code(part)) {
         if parse_decimal(parts[0]).is_none() {
@@ -112,7 +140,7 @@ pub fn conversion_item(
         Some(engine) => engine,
         slot @ None => slot.insert(UnitEngine::new()?),
     };
-    if let Some(conversion) = legacy_conversion(query) {
+    if let Some(conversion) = legacy_conversion_with_customary_system(query, customary_system) {
         return match engine.evaluate_legacy(conversion) {
             Ok(evaluation) => {
                 let url = wolfram_url(&format!(

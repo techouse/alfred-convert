@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 
 use alfred_convert::app::DefaultAction;
+use alfred_convert::units::CustomarySystem;
 use alfred_workflow_rs::{
     AutomaticCache, CheckBoxConfiguration, CheckBoxUserConfiguration, SelectConfiguration,
     SelectUserConfiguration, UserConfiguration, Workflow,
@@ -123,6 +124,7 @@ fn workflow_settings_should_load_all_select_preferences() -> anyhow::Result<()> 
         select_configuration("default_currency", "EUR"),
         select_configuration("default_monetary_action", "copy_to_clipboard"),
         select_configuration("default_non_monetary_action", "open_website"),
+        select_configuration("default_customary_system", "us_customary"),
     ]);
     let settings = workflow_settings_from_defaults(&defaults)?;
     assert_eq!(
@@ -130,11 +132,13 @@ fn workflow_settings_should_load_all_select_preferences() -> anyhow::Result<()> 
             settings.home_currency.code(),
             settings.default_monetary_action,
             settings.default_non_monetary_action,
+            settings.customary_system,
         ),
         (
             "EUR",
             DefaultAction::CopyToClipboard,
             DefaultAction::OpenWebsite,
+            CustomarySystem::UsCustomary,
         )
     );
     Ok(())
@@ -165,8 +169,13 @@ fn workflow_settings_should_fall_back_for_wrong_action_configuration_type() -> a
         (
             settings.default_monetary_action,
             settings.default_non_monetary_action,
+            settings.customary_system,
         ),
-        (DefaultAction::OpenWebsite, DefaultAction::CopyToClipboard,)
+        (
+            DefaultAction::OpenWebsite,
+            DefaultAction::CopyToClipboard,
+            CustomarySystem::Imperial,
+        )
     );
     Ok(())
 }
@@ -183,9 +192,47 @@ fn workflow_settings_should_ignore_obsolete_and_unknown_action_values() -> anyho
         (
             settings.default_monetary_action,
             settings.default_non_monetary_action,
+            settings.customary_system,
         ),
-        (DefaultAction::OpenWebsite, DefaultAction::OpenWebsite)
+        (
+            DefaultAction::OpenWebsite,
+            DefaultAction::OpenWebsite,
+            CustomarySystem::Imperial,
+        )
     );
+    Ok(())
+}
+
+#[test]
+fn workflow_settings_should_fall_back_for_invalid_customary_system_preferences()
+-> anyhow::Result<()> {
+    for configuration in [
+        UserConfiguration::CheckBox(CheckBoxUserConfiguration {
+            variable: "default_customary_system".to_owned(),
+            description: None,
+            label: None,
+            config: CheckBoxConfiguration {
+                default_value: true,
+                value: true,
+                required: false,
+                text: None,
+            },
+        }),
+        UserConfiguration::Select(SelectUserConfiguration {
+            variable: "default_customary_system".to_owned(),
+            description: None,
+            label: None,
+            config: SelectConfiguration {
+                default_value: "unexpected".to_owned(),
+                value: "unexpected".to_owned(),
+                pairs: Vec::new(),
+            },
+        }),
+    ] {
+        let defaults = BTreeMap::from([("default_customary_system".to_owned(), configuration)]);
+        let settings = workflow_settings_from_defaults(&defaults)?;
+        assert_eq!(settings.customary_system, CustomarySystem::Imperial);
+    }
     Ok(())
 }
 

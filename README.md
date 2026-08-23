@@ -43,6 +43,10 @@ In order to set a default currency, you can set it in the Workflow Configuration
 Valid values are the [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency codes: AUD, BRL, CAD, CHF, CNY, CZK, 
 DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, ISK, JPY, KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RUB, SEK, SGD, THB, TRY, USD, ZAR.
 
+### Default customary units
+
+The Workflow Configuration defaults ambiguous historical shorthand to Imperial (UK) units. Choose US customary to use US definitions for bare `gal`, `pt`, `fl.oz`/`floz`, `tbsp.`, `tsp.`, and `mpg`. Explicit `us.gal`, `us.pt`, `us.fl.oz`, `us.floz`, and `us.mpg` aliases always use US customary units, while native Numbat names such as `gallon`, `tablespoon`, and `fluidounce` remain explicit. `cup` is always US customary.
+
 ### Default actions
 
 The Workflow Configuration provides separate Default monetary action and Default non-monetary action preferences. `Open website` remains the default for both; choose `Copy to clipboard` to copy only the converted value instead. <kbd>cmd+return</kbd> always performs the alternate action.

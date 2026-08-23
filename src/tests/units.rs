@@ -1,4 +1,7 @@
-use super::{LegacyConversion, UnitEngine, legacy_conversion, legacy_unit};
+use super::{
+    CustomarySystem, LegacyConversion, UnitEngine, legacy_conversion,
+    legacy_conversion_with_customary_system, legacy_unit, legacy_unit_with_customary_system,
+};
 
 const CONVERTIBLE_DART_ALIASES: &[&str] = &[
     "°",
@@ -404,6 +407,109 @@ fn compatibility_aliases_should_keep_imperial_gallon_semantics() -> anyhow::Resu
         legacy_conversion("1 gal l").ok_or_else(|| anyhow::anyhow!("legacy conversion missing"))?;
     let result = engine.evaluate_legacy(conversion)?;
     assert_eq!(result.result, "1 imp gal = 4.546 l");
+    Ok(())
+}
+
+#[test]
+fn customary_system_preference_should_default_to_imperial() {
+    assert_eq!(CustomarySystem::default(), CustomarySystem::Imperial);
+    assert_eq!(
+        CustomarySystem::from_preference(Some("imperial")),
+        CustomarySystem::Imperial
+    );
+    assert_eq!(
+        CustomarySystem::from_preference(Some("us_customary")),
+        CustomarySystem::UsCustomary
+    );
+    assert_eq!(
+        CustomarySystem::from_preference(None),
+        CustomarySystem::Imperial
+    );
+    assert_eq!(
+        CustomarySystem::from_preference(Some("unknown")),
+        CustomarySystem::Imperial
+    );
+}
+
+#[test]
+fn customary_system_should_resolve_ambiguous_aliases_in_both_positions() -> anyhow::Result<()> {
+    for alias in ["gal", "pt", "fl.oz", "floz", "tbsp.", "tsp.", "mpg"] {
+        let imperial = legacy_unit_with_customary_system(alias, CustomarySystem::Imperial)
+            .ok_or_else(|| anyhow::anyhow!("imperial alias {alias} missing"))?;
+        let us = legacy_unit_with_customary_system(alias, CustomarySystem::UsCustomary)
+            .ok_or_else(|| anyhow::anyhow!("US alias {alias} missing"))?;
+        if alias == "mpg" {
+            assert_ne!(imperial.special, us.special, "alias: {alias}");
+        } else {
+            assert_ne!(imperial.expression, us.expression, "alias: {alias}");
+        }
+
+        let companion = if alias == "mpg" { "km/l" } else { "ml" };
+        let imperial_query = format!("1 {alias} {companion}");
+        let us_query = format!("1 {companion} {alias}");
+        let imperial_conversion =
+            legacy_conversion_with_customary_system(&imperial_query, CustomarySystem::Imperial)
+                .ok_or_else(|| anyhow::anyhow!("source alias: {alias}"))?;
+        let us_conversion =
+            legacy_conversion_with_customary_system(&us_query, CustomarySystem::UsCustomary)
+                .ok_or_else(|| anyhow::anyhow!("target alias: {alias}"))?;
+        assert_eq!(imperial_conversion.from, imperial, "source alias: {alias}");
+        assert_eq!(us_conversion.to, us, "target alias: {alias}");
+    }
+    Ok(())
+}
+
+#[test]
+fn customary_system_should_preserve_explicit_us_aliases_and_native_units() -> anyhow::Result<()> {
+    for alias in ["us.gal", "us.pt", "us.fl.oz", "us.floz", "us.mpg"] {
+        let imperial = legacy_unit_with_customary_system(alias, CustomarySystem::Imperial)
+            .ok_or_else(|| anyhow::anyhow!("imperial lookup missing {alias}"))?;
+        let us = legacy_unit_with_customary_system(alias, CustomarySystem::UsCustomary)
+            .ok_or_else(|| anyhow::anyhow!("US lookup missing {alias}"))?;
+        assert_eq!(imperial, us, "explicit alias changed: {alias}");
+    }
+    let mut engine = UnitEngine::new()?;
+    assert_eq!(
+        engine.evaluate_native("1 gallon to liter")?.result,
+        "3.78541 l"
+    );
+    assert_eq!(
+        engine.evaluate_native("1 imperial_gallon to liter")?.result,
+        "4.54609 l"
+    );
+    assert_eq!(engine.evaluate_native("1 cup to mL")?.result, "236.588 ml");
+    Ok(())
+}
+
+#[test]
+fn customary_system_should_match_legacy_volume_and_mpg_coefficients() -> anyhow::Result<()> {
+    let cases = [
+        (
+            "1 floz ml",
+            "1 imp fl oz = 28.413 ml",
+            "1 US fl oz = 29.574 ml",
+        ),
+        ("1 gal l", "1 imp gal = 4.546 l", "1 US gal = 3.785 l"),
+        ("1 pt ml", "1 imp pt = 568.261 ml", "1 US pt = 473.176 ml"),
+        ("1 tbsp. ml", "1 tbsp. = 14.207 ml", "1 tbsp. = 14.787 ml"),
+        ("1 tsp. ml", "1 tsp. = 3.552 ml", "1 tsp. = 4.929 ml"),
+        ("1 mpg km/l", "1 mpg = 0.354 km/l", "1 mpg = 0.425 km/l"),
+    ];
+    for (query, expected_imperial, expected_us) in cases {
+        let mut engine = UnitEngine::new()?;
+        let imperial = legacy_conversion_with_customary_system(query, CustomarySystem::Imperial)
+            .ok_or_else(|| anyhow::anyhow!("imperial conversion missing: {query}"))?;
+        assert_eq!(
+            engine.evaluate_legacy(imperial)?.result,
+            expected_imperial,
+            "{query}"
+        );
+
+        let mut engine = UnitEngine::new()?;
+        let us = legacy_conversion_with_customary_system(query, CustomarySystem::UsCustomary)
+            .ok_or_else(|| anyhow::anyhow!("US conversion missing: {query}"))?;
+        assert_eq!(engine.evaluate_legacy(us)?.result, expected_us, "{query}");
+    }
     Ok(())
 }
 

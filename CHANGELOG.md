@@ -1,3 +1,7 @@
+## 1.3.1-dev
+
+- [FEAT] add an Imperial/US customary preference for ambiguous legacy unit shorthand
+
 ## 1.3.0
 
 - [FEAT] add separate configurable default actions for monetary and non-monetary results, with Command-Return performing the alternate website or clipboard action

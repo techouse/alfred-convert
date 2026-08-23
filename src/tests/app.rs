@@ -1,8 +1,9 @@
 use crate::app::{
-    DefaultAction, conversion_item, currency_items, invalid_item, placeholder_item, unit_items,
+    DefaultAction, conversion_item, conversion_item_with_customary_system, currency_items,
+    invalid_item, placeholder_item, unit_items,
 };
 use crate::currency::{Currency, ExchangeRates};
-use crate::units::UnitListing;
+use crate::units::{CustomarySystem, UnitListing};
 use jiff::Timestamp;
 use rust_decimal::Decimal;
 
@@ -445,6 +446,81 @@ fn legacy_unit_conversion_should_copy_only_the_value_by_default() -> anyhow::Res
             Some("Open conversion details on WolframAlpha.com"),
         )
     );
+    Ok(())
+}
+
+#[test]
+fn customary_system_should_change_legacy_fluid_ounce_rendering() -> anyhow::Result<()> {
+    let home = currency("USD")?;
+    for (system, expected_title, expected_subtitle, expected_value, expected_url) in [
+        (
+            CustomarySystem::Imperial,
+            "1 imp fl oz = 28.413 ml",
+            "Based on the fact that 1 imp fl oz = 28.413 ml",
+            "28.413 ml",
+            "https://www.wolframalpha.com/input?i=1.0+imp+fl+oz+to+ml",
+        ),
+        (
+            CustomarySystem::UsCustomary,
+            "1 US fl oz = 29.574 ml",
+            "Based on the fact that 1 US fl oz = 29.574 ml",
+            "29.574 ml",
+            "https://www.wolframalpha.com/input?i=1.0+US+fl+oz+to+ml",
+        ),
+    ] {
+        let mut engine = None;
+        let item = conversion_item_with_customary_system(
+            "1 floz ml",
+            home,
+            DefaultAction::OpenWebsite,
+            DefaultAction::OpenWebsite,
+            system,
+            None,
+            &mut engine,
+        )?
+        .into_item(None);
+        assert_eq!(
+            (
+                item.title(),
+                item.subtitle(),
+                item.arg(),
+                item.quick_look_url()
+            ),
+            (
+                expected_title,
+                Some(expected_subtitle),
+                Some(expected_url),
+                Some(expected_url),
+            )
+        );
+
+        let mut engine = None;
+        let copy_item = conversion_item_with_customary_system(
+            "1 floz ml",
+            home,
+            DefaultAction::OpenWebsite,
+            DefaultAction::CopyToClipboard,
+            system,
+            None,
+            &mut engine,
+        )?
+        .into_item(None);
+        let command = copy_item
+            .modifiers()
+            .and_then(|modifiers| modifiers.get("cmd"));
+        assert_eq!(
+            (
+                copy_item.arg(),
+                command.and_then(alfred_workflow_rs::Modifier::arg),
+                command.and_then(alfred_workflow_rs::Modifier::subtitle),
+            ),
+            (
+                Some(expected_value),
+                Some(expected_url),
+                Some("Open conversion details on WolframAlpha.com"),
+            )
+        );
+    }
     Ok(())
 }
 
