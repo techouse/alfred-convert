@@ -1,110 +1,37 @@
 name: Release package
-
 on:
   push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
-defaults:
-  run:
-    shell: bash
-env:
-  PUB_ENVIRONMENT: bot.github
+    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
 permissions: read-all
-
 jobs:
+  test:
+    uses: ./.github/workflows/test.yml
   build:
-    name: "Build"
-    strategy:
-      matrix:
-        os: [macos-latest, macos-15-intel]
-      fail-fast: true
+    needs: test
     uses: ./.github/workflows/build.yml
-    with:
-      runs-on: ${{ matrix.os }}
     secrets: inherit
-  github_release:
-    name: "Github Release"
+  github-release:
     needs: build
     environment: build
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    permissions: { contents: write }
     steps:
       - uses: actions/checkout@v7
-      - name: Read pubspec.yaml version
-        id: read_pubspec_version
+      - id: version
         run: |
-          set -e
-          VERSION=$(yq -r '.version' pubspec.yaml)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-      - name: Get arm64 artifact
-        id: download_arm64_artifact
-        uses: actions/download-artifact@v8
-        env:
-          WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
-          ARCH: arm64
+          set -euo pipefail
+          ./scripts/version-check.sh "$GITHUB_REF_NAME"
+          VERSION=$(awk '/^\[package\]$/ { p = 1; next } p && /^\[/ { exit } p && /^version = / { gsub(/["[:space:]]/, "", $3); print $3; exit }' Cargo.toml)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          grep -q "## $VERSION" CHANGELOG.md
+          CHANGELOG_PATH="$RUNNER_TEMP/CHANGELOG.md"
+          awk '/^##[[:space:]].*/ { if (count == 1) exit; count++; print } count == 1 && !/^##[[:space:]].*/ { print }' CHANGELOG.md > "$CHANGELOG_PATH"
+          echo "changelog-path=$CHANGELOG_PATH" >> "$GITHUB_OUTPUT"
+      - uses: actions/download-artifact@v8
         with:
-          name: ${{ env.WORKFLOW_NAME }}-v${{ env.VERSION }}-${{ env.ARCH }}
+          name: ${{ vars.WORKFLOW_NAME }}-v${{ steps.version.outputs.version }}-universal
           path: ${{ runner.temp }}/download
-      - name: Get x86_64 artifact
-        id: download_x86_64_artifact
-        uses: actions/download-artifact@v8
-        env:
-          WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
-          ARCH: x86_64
+      - uses: softprops/action-gh-release@v3
         with:
-          name: ${{ env.WORKFLOW_NAME }}-v${{ env.VERSION }}-${{ env.ARCH }}
-          path: ${{ runner.temp }}/download
-      - name: Unzip artifacts
-        env:
-          WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
-        id: unzip_artifacts
-        working-directory: ${{ runner.temp }}/download
-        run: |
-          set -e
-          for ARCH in "arm64" "x86_64"; do
-            mkdir -p $ARCH
-            unzip -q ${{ env.WORKFLOW_NAME }}-v${{ env.VERSION }}-${ARCH}.zip -d $ARCH
-          done
-      - name: Create Alfred Workflow
-        id: create_alfred_workflow
-        env:
-          WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
-        working-directory: ${{ runner.temp }}/download
-        run: |
-          set -e
-          mv x86_64/workflow arm64/workflow_intel
-          pushd arm64
-          find . -not -path "./*_cache*" -exec zip --symlinks "../${WORKFLOW_NAME}-v${VERSION}.alfredworkflow" {} +
-          popd
-      - name: Check CHANGELOG.md
-        id: check_changelog
-        run: |
-          set -e
-          if ! grep -q "## $VERSION" CHANGELOG.md; then
-            echo "CHANGELOG.md does not contain a section for $VERSION"
-            exit 1
-          fi
-      - name: Create tag-specific CHANGELOG
-        id: create_changelog
-        run: |
-          set -e
-          CHANGELOG_PATH=$RUNNER_TEMP/CHANGELOG.md
-          awk '/^##[[:space:]].*/ { if (count == 1) exit; count++; print } count == 1 && !/^##[[:space:]].*/ { print }' CHANGELOG.md | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' > $CHANGELOG_PATH
-          echo "CHANGELOG_PATH=$CHANGELOG_PATH" >> $GITHUB_ENV
-      - name: Release
-        id: release_workflow
-        env:
-          WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
-        uses: softprops/action-gh-release@v3
-        with:
-          name: ${{ env.VERSION }}
-          tag_name: v${{ env.VERSION }}
-          body_path: ${{ env.CHANGELOG_PATH }}
-          files: |
-            ${{ runner.temp }}/download/${{ env.WORKFLOW_NAME }}-v${{ env.VERSION }}.alfredworkflow
-      - name: Clean up keychain and build directory
-        id: clean_up
-        if: ${{ always() }}
-        run: |
-          rm -rf $RUNNER_TEMP/download
+          body_path: ${{ steps.version.outputs.changelog-path }}
+          files: ${{ runner.temp }}/download/${{ vars.WORKFLOW_NAME }}-v${{ steps.version.outputs.version }}.alfredworkflow

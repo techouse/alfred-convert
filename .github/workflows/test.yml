@@ -1,0 +1,29 @@
+name: Test
+on: [push, pull_request, workflow_call]
+permissions: read-all
+jobs:
+  stable:
+    name: Stable Rust checks
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt,clippy
+      - uses: taiki-e/install-action@v2
+        with: { tool: cargo-about }
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all --check
+      - run: cargo test --all-targets --locked
+      - run: cargo clippy --all-targets --all-features --locked -- -D warnings
+      - run: ./scripts/version-check.sh
+      - run: make licenses
+  msrv:
+    name: MSRV (1.88)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@master
+        with: { toolchain: '1.88.0' }
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --all-targets --all-features --locked
