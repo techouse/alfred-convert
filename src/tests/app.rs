@@ -525,6 +525,72 @@ fn customary_system_should_change_legacy_fluid_ounce_rendering() -> anyhow::Resu
 }
 
 #[test]
+fn explicit_customary_aliases_should_keep_labels_and_actions() -> anyhow::Result<()> {
+    let home = currency("USD")?;
+    let expected_url = "https://www.wolframalpha.com/input?i=1.0+UK+fl+oz+to+US+fl+oz";
+    for customary_system in [CustomarySystem::Imperial, CustomarySystem::UsCustomary] {
+        let mut engine = None;
+        let website_item = conversion_item_with_customary_system(
+            "1 uk_floz to us_floz",
+            home,
+            DefaultAction::OpenWebsite,
+            DefaultAction::OpenWebsite,
+            customary_system,
+            None,
+            &mut engine,
+        )?
+        .into_item(None);
+        let website_command = website_item
+            .modifiers()
+            .and_then(|modifiers| modifiers.get("cmd"));
+        assert_eq!(
+            (
+                website_item.title(),
+                website_item.subtitle(),
+                website_item.arg(),
+                website_item.quick_look_url(),
+                website_command.and_then(alfred_workflow_rs::Modifier::arg),
+            ),
+            (
+                "1 UK fl oz = 0.961 US fl oz",
+                Some("Based on the fact that 1 UK fl oz = 0.961 US fl oz"),
+                Some(expected_url),
+                Some(expected_url),
+                Some("0.961 US fl oz"),
+            )
+        );
+
+        let mut engine = None;
+        let copy_item = conversion_item_with_customary_system(
+            "1 uk_floz to us_floz",
+            home,
+            DefaultAction::OpenWebsite,
+            DefaultAction::CopyToClipboard,
+            customary_system,
+            None,
+            &mut engine,
+        )?
+        .into_item(None);
+        let copy_command = copy_item
+            .modifiers()
+            .and_then(|modifiers| modifiers.get("cmd"));
+        assert_eq!(
+            (
+                copy_item.arg(),
+                copy_item.quick_look_url(),
+                copy_command.and_then(alfred_workflow_rs::Modifier::arg),
+            ),
+            (
+                Some("0.961 US fl oz"),
+                Some(expected_url),
+                Some(expected_url),
+            )
+        );
+    }
+    Ok(())
+}
+
+#[test]
 fn invalid_unit_expression_should_not_receive_result_actions() -> anyhow::Result<()> {
     let home = currency("USD")?;
     let mut engine = None;

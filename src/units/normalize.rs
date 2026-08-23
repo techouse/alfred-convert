@@ -204,6 +204,8 @@ pub fn legacy_unit_with_customary_system(
         "km/l" => fuel("km/l", FuelUnit::KilometersPerLiter),
         "l/100km" => fuel("l/100km", FuelUnit::LitersPer100Kilometers),
         "us.mpg" => fuel("mpg", FuelUnit::MilesPerUsGallon),
+        "uk_mpg" | "uk_miles_per_gallon" => fuel("UK mpg", FuelUnit::MilesPerImperialGallon),
+        "us_mpg" | "us_miles_per_gallon" => fuel("US mpg", FuelUnit::MilesPerUsGallon),
         "mpg" => match customary_system {
             CustomarySystem::Imperial => fuel("mpg", FuelUnit::MilesPerImperialGallon),
             CustomarySystem::UsCustomary => fuel("mpg", FuelUnit::MilesPerUsGallon),
@@ -306,17 +308,25 @@ pub fn legacy_unit_with_customary_system(
             CustomarySystem::Imperial => ordinary("imperial_gallon", "imp gal", "Volume", "🧪"),
             CustomarySystem::UsCustomary => ordinary("gallon", "US gal", "Volume", "🧪"),
         },
-        "us.gal" => ordinary("gallon", "US gal", "Volume", "🧪"),
+        "uk_gal" | "uk_gallon" => ordinary("imperial_gallon", "UK gal", "Volume", "🧪"),
+        "us.gal" | "us_gal" | "us_gallon" => ordinary("gallon", "US gal", "Volume", "🧪"),
         "pt" => match customary_system {
             CustomarySystem::Imperial => ordinary("imperial_pint", "imp pt", "Volume", "🧪"),
             CustomarySystem::UsCustomary => ordinary("pint", "US pt", "Volume", "🧪"),
         },
-        "us.pt" => ordinary("pint", "US pt", "Volume", "🧪"),
+        "uk_qt" | "uk_quart" => ordinary("imperial_quart", "UK qt", "Volume", "🧪"),
+        "us_qt" | "us_quart" => ordinary("gallon / 4", "US qt", "Volume", "🧪"),
+        "uk_pt" | "uk_pint" => ordinary("imperial_pint", "UK pt", "Volume", "🧪"),
+        "us.pt" | "us_pt" | "us_pint" => ordinary("pint", "US pt", "Volume", "🧪"),
+        "uk_gi" | "uk_gill" => ordinary("imperial_gill", "UK gi", "Volume", "🧪"),
+        "us_gi" | "us_gill" => ordinary("gallon / 32", "US gi", "Volume", "🧪"),
         "ml" => ordinary("mL", "ml", "Volume", "🧪"),
         "tbsp." => match customary_system {
             CustomarySystem::Imperial => ordinary("imperial_tablespoon", "tbsp.", "Volume", "🧪"),
             CustomarySystem::UsCustomary => ordinary("tablespoon", "tbsp.", "Volume", "🧪"),
         },
+        "uk_tbsp" | "uk_tablespoon" => ordinary("imperial_tablespoon", "UK tbsp", "Volume", "🧪"),
+        "us_tbsp" | "us_tablespoon" => ordinary("tablespoon", "US tbsp", "Volume", "🧪"),
         "cup" => ordinary("cup", "cup", "Volume", "🧪"),
         "cm3" => ordinary("cm^3", "cm³", "Volume", "🧪"),
         "ft3" => ordinary("ft^3", "ft³", "Volume", "🧪"),
@@ -328,7 +338,14 @@ pub fn legacy_unit_with_customary_system(
             }
             CustomarySystem::UsCustomary => ordinary("fluidounce", "US fl oz", "Volume", "🧪"),
         },
-        "us.fl.oz" | "us.floz" => ordinary("fluidounce", "US fl oz", "Volume", "🧪"),
+        "uk_floz" | "uk_fluid_ounce" => ordinary("imperial_fluidounce", "UK fl oz", "Volume", "🧪"),
+        "us.fl.oz" | "us.floz" | "us_floz" | "us_fluid_ounce" => {
+            ordinary("fluidounce", "US fl oz", "Volume", "🧪")
+        }
+        "uk_fldr" | "uk_fluid_drachm" => {
+            ordinary("imperial_fluid_drachm", "UK fl dr", "Volume", "🧪")
+        }
+        "us_fldr" | "us_fluid_dram" => ordinary("fluidounce / 8", "US fl dr", "Volume", "🧪"),
         "US. liq. gi" => ordinary("gallon / 32", "US. liq. gi", "Volume", "🧪"),
         "US. liq. qt" => ordinary("gallon / 4", "US. liq. qt", "Volume", "🧪"),
         "fl" => ordinary("femtoliter", "fl", "Volume", "🧪"),
@@ -341,6 +358,8 @@ pub fn legacy_unit_with_customary_system(
             CustomarySystem::Imperial => ordinary("imperial_teaspoon", "tsp.", "Volume", "🧪"),
             CustomarySystem::UsCustomary => ordinary("teaspoon", "tsp.", "Volume", "🧪"),
         },
+        "uk_tsp" | "uk_teaspoon" => ordinary("imperial_teaspoon", "UK tsp", "Volume", "🧪"),
+        "us_tsp" | "us_teaspoon" => ordinary("teaspoon", "US tsp", "Volume", "🧪"),
         _ => return None,
     })
 }

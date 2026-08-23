@@ -164,7 +164,7 @@ impl UnitEngine {
         to: super::normalize::LegacyUnit,
     ) -> Result<Decimal> {
         let expression = legacy_expression(amount, from, to)?;
-        match self.evaluate(&expression)? {
+        let value = match self.evaluate(&expression)? {
             Value::Quantity(quantity) => legacy_decimal(quantity.unsafe_value().to_f64())
                 .ok_or_else(|| anyhow!("Numbat returned a non-finite legacy result")),
             value => {
@@ -172,7 +172,19 @@ impl UnitEngine {
                 parse_decimal(&rendered)
                     .ok_or_else(|| anyhow!("Numbat returned {rendered} instead of a quantity"))
             }
-        }
+        }?;
+        value
+            .checked_mul(legacy_target_scale(to.expression))
+            .ok_or_else(|| anyhow!("Numbat returned an out-of-range legacy result"))
+    }
+}
+
+fn legacy_target_scale(expression: &str) -> Decimal {
+    match expression {
+        "gallon / 4" => Decimal::from(4),
+        "gallon / 32" => Decimal::from(32),
+        "fluidounce / 8" => Decimal::from(8),
+        _ => Decimal::ONE,
     }
 }
 

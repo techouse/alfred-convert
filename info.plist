@@ -338,7 +338,7 @@ Heavily inspired by [deanishe/alfred-convert](https://github.com/deanishe/alfred
 - `conv units` - View a list of all the supported physical units
     - When selecting a certain unit and pressing &lt;kbd&gt;return&lt;/kbd&gt; (↵) that unit's symbol will get copied to the clipboard.
 
-The Default customary units preference selects Imperial (UK) or US customary definitions for ambiguous historical shorthand: `gal`, `pt`, `fl.oz`/`floz`, `tbsp.`, `tsp.`, and `mpg`. Explicit `us.*` aliases and native Numbat unit names override the preference; `cup` remains US customary.</string>
+The Default customary units preference selects Imperial (UK) or US customary definitions for ambiguous historical shorthand: `gal`, `pt`, `fl.oz`/`floz`, `tbsp.`, `tsp.`, and `mpg`. Explicit `us.*` aliases and native Numbat unit names override the preference; `cup` remains US customary. For cross-system conversions, use lowercase `uk_`/`us_` aliases (short or long forms) for gallons, quarts, pints, gills, fluid ounces, fluid drachms/drams, tablespoons, teaspoons, and miles per gallon. For example, `conv 1 uk_floz to us_floz` gives `1 UK fl oz = 0.961 US fl oz`; these explicit aliases ignore the preference.</string>
 	<key>uidata</key>
 	<dict>
 		<key>1BBB07BA-11B1-4386-AB63-A9CB78D9A1A9</key>
