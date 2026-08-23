@@ -1,7 +1,11 @@
+use std::net::TcpListener;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::thread;
+use std::time::{Duration, Instant};
 
 use tempfile::TempDir;
+use url::Url;
 
 use super::{EmojiImageCache, image_filename, png_crc32};
 
@@ -69,6 +73,36 @@ fn zero_byte_cache_entry_should_be_replaced_atomically() -> anyhow::Result<()> {
     assert!(std::fs::read_dir(directory.path())?.all(|entry| {
         entry.is_ok_and(|entry| !entry.file_name().to_string_lossy().ends_with(".tmp"))
     }));
+    Ok(())
+}
+
+#[test]
+fn batch_budget_should_bound_a_stalled_download() -> anyhow::Result<()> {
+    let listener = TcpListener::bind("127.0.0.1:0")?;
+    let address = listener.local_addr()?;
+    let server = thread::spawn(move || {
+        if let Ok((_stream, _)) = listener.accept() {
+            thread::sleep(Duration::from_millis(800));
+        }
+    });
+    let directory = TempDir::new()?;
+    let cache = EmojiImageCache::with_test_endpoint(
+        directory.path().to_path_buf(),
+        Url::parse(&format!("http://{address}/"))?,
+        Duration::from_millis(100),
+    )?;
+
+    let started = Instant::now();
+    let _ = cache.resolve_many(&["💾".to_owned()]);
+    let elapsed = started.elapsed();
+    server
+        .join()
+        .map_err(|_| anyhow::anyhow!("stalled image server panicked"))?;
+
+    assert!(
+        elapsed < Duration::from_millis(500),
+        "batch exceeded its deadline tolerance: {elapsed:?}"
+    );
     Ok(())
 }
 
