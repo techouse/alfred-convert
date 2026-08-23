@@ -1,0 +1,6 @@
+{
+  "title": "Invalid format.",
+  "subtitle": "Usage: conv 123.45 gbp usd",
+  "valid": false,
+  "icon": "icon.png"
+}

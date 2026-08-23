@@ -1,0 +1,7 @@
+{
+  "query": "10 mi km",
+  "title": "10 mi = 16.093 km",
+  "subtitle": "Based on the fact that 1 mi = 1.609 km",
+  "arg": "https://www.wolframalpha.com/input?i=10.0+mi+to+km",
+  "emoji_filename": "1f4cf.png"
+}

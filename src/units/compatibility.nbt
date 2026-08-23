@@ -1,0 +1,82 @@
+# Legacy units whose definitions differ from, or are absent from, Numbat's prelude.
+@name("Legacy calorie")
+unit legacy_calorie: Energy = 4.1867999409 J
+
+@name("Legacy kilocalorie")
+unit legacy_kilocalorie: Energy = 1000 legacy_calorie
+
+@name("Legacy electronvolt")
+unit legacy_electronvolt: Energy = 1.60217646e-19 J
+
+@name("Legacy British thermal unit")
+unit legacy_btu: Energy = 1055.05585 J
+
+@name("Legacy imperial horsepower")
+unit legacy_imperial_horsepower: Power = 745.69987158 W
+
+@name("Legacy poundal")
+unit legacy_poundal: Force = 0.138254954376 N
+
+@name("Legacy kilogram-force metre")
+unit legacy_kilogram_force_meter: Energy = 9.807 N * m
+
+@name("Legacy radian")
+unit legacy_radian: Angle = 57.295779513 degree
+
+@name("Legacy foot-pound energy")
+unit legacy_energy_foot_pound: Energy = 1.3558179483314004 J
+
+@name("Legacy pound-force")
+unit legacy_pound_force: Force = 4.4482216152605 N
+
+@name("Legacy light-year")
+unit legacy_lightyear: Length = 63241.1 astronomicalunit
+
+@name("Legacy parsec")
+unit legacy_parsec: Length = 3.26 legacy_lightyear
+
+@name("Legacy unified atomic mass unit")
+unit legacy_atomic_mass_unit: Mass = 1.660539e-24 g
+
+@name("Legacy pound per square inch")
+unit legacy_psi: Pressure = 6894.757293168 Pa
+
+@name("Legacy torr")
+unit legacy_torr: Pressure = 133.322368421 Pa
+
+@name("Legacy inch of mercury")
+unit legacy_inch_of_mercury: Pressure = 25.4 legacy_torr
+
+@name("Legacy kilopound per square inch")
+# Numbat canonicalization loses the final Dart binary64 ULP for the archived
+# 6.8947572931783e6 coefficient, so select its adjacent representation here.
+unit legacy_ksi: Pressure = 6.894757293178301e6 Pa
+
+@name("Legacy pound-force foot torque")
+unit legacy_torque_pound_force_foot: Energy = 1.35581794902490555 N * m
+
+@name("Legacy pound-force inch torque")
+unit legacy_torque_pound_force_inch: Energy = legacy_torque_pound_force_foot / 12
+
+@name("Legacy 365-day year")
+unit legacy_year365: Time = 365 day
+
+@name("Legacy metric carat")
+unit legacy_carat: Mass = 0.2 g
+
+@name("Legacy metric teaspoon")
+unit legacy_metric_teaspoon: Volume = 5 mL
+
+fn legacy_km_per_l_to_l_per_100km(value: Scalar) -> Scalar = 100 / value
+fn legacy_l_per_100km_to_km_per_l(value: Scalar) -> Scalar = 100 / value
+fn legacy_km_per_l_to_us_mpg(value: Scalar) -> Scalar = value / 0.4251437074
+fn legacy_us_mpg_to_km_per_l(value: Scalar) -> Scalar = value * 0.4251437074
+fn legacy_km_per_l_to_imperial_mpg(value: Scalar) -> Scalar = value / 0.3540061899
+fn legacy_imperial_mpg_to_km_per_l(value: Scalar) -> Scalar = value * 0.3540061899
+
+fn legacy_celsius_to_reamur(value: Scalar) -> Scalar = value * 4 / 5
+fn legacy_reamur_to_celsius(value: Scalar) -> Scalar = value * 5 / 4
+fn legacy_celsius_to_romer(value: Scalar) -> Scalar = value * 21 / 40 + 7.5
+fn legacy_romer_to_celsius(value: Scalar) -> Scalar = (value - 7.5) * 40 / 21
+fn legacy_celsius_to_delisle(value: Scalar) -> Scalar = (100 - value) * 3 / 2
+fn legacy_delisle_to_celsius(value: Scalar) -> Scalar = 100 - value * 2 / 3
