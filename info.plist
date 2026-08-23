@@ -111,7 +111,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>[ "$(uname -m)" = "arm64" ] &amp;&amp; ./workflow -u || ./workflow_intel -u</string>
+				<string>./workflow -u</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -230,16 +230,16 @@
 				<key>script</key>
 				<string>case "{query}" in
 	"money")
-		[ "$(uname -m)" = "arm64" ] &amp;&amp; ./workflow -C || ./workflow_intel -C
+		./workflow -C
 		;;
 	"units")
-		[ "$(uname -m)" = "arm64" ] &amp;&amp; ./workflow -U || ./workflow_intel -U
+		./workflow -U
 		;;
 	"update:workflow")
-		[ "$(uname -m)" = "arm64" ] &amp;&amp; ./workflow -u || ./workflow_intel -u
+		./workflow -u
 		;;
 	*)
-		[ "$(uname -m)" = "arm64" ] &amp;&amp; ./workflow -q "{query}" || ./workflow_intel -q "{query}"
+		./workflow -q "{query}"
 		;;
 esac</string>
 				<key>scriptargtype</key>
