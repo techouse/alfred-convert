@@ -91,6 +91,24 @@ fn xml_source_date_should_remain_on_the_same_utc_day() -> anyhow::Result<()> {
 }
 
 #[test]
+fn missing_response_date_should_use_current_utc_midnight() -> anyhow::Result<()> {
+    let xml = r#"<?xml version="1.0"?><Envelope><Cube><Cube><Cube currency="USD" rate="1.1732"/></Cube></Cube></Envelope>"#;
+    let now = "2026-08-21T17:34:56Z".parse::<Timestamp>()?;
+    let rates = parse_exchange_rates(xml, None, now)?;
+    assert_eq!(rates.date.to_string(), "2026-08-21T00:00:00Z");
+    Ok(())
+}
+
+#[test]
+fn invalid_response_date_should_use_current_utc_midnight() -> anyhow::Result<()> {
+    let xml = r#"<?xml version="1.0"?><Envelope><Cube><Cube><Cube currency="USD" rate="1.1732"/></Cube></Cube></Envelope>"#;
+    let now = "2026-08-21T17:34:56Z".parse::<Timestamp>()?;
+    let rates = parse_exchange_rates(xml, Some("not a valid date"), now)?;
+    assert_eq!(rates.date.to_string(), "2026-08-21T00:00:00Z");
+    Ok(())
+}
+
+#[test]
 fn failed_refresh_should_return_stale_cache_with_bounded_diagnostic() -> anyhow::Result<()> {
     let endpoint = serve_once(503, &[], b"temporarily unavailable")?;
     let client =
