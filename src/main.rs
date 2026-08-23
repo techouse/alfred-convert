@@ -1,11 +1,13 @@
 #![forbid(unsafe_code)]
 
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use std::time::Duration;
 
 use alfred_convert::app::{
-    PendingItem, conversion_item, currency_items, invalid_item, placeholder_item, unit_items,
+    CurrencyDefaultAction, PendingItem, conversion_item, currency_items, invalid_item,
+    placeholder_item, unit_items,
 };
 use alfred_convert::cli::Cli;
 use alfred_convert::currency::{Currency, EcbClient, ExchangeRateCache};
@@ -65,13 +67,17 @@ fn populate_workflow(workflow: &mut Workflow, cli: &Cli) -> Result<()> {
         eprintln!("Query: \"{query}\"");
     }
     let directory = workflow_directory()?;
-    let home = home_currency(workflow, &directory)?;
+    let settings = workflow_settings(workflow, &directory)?;
 
     if cli.currencies {
         let rates = latest_rates(&directory, cli.verbose)?;
         return add_pending_items(
             workflow,
-            currency_items(home, rates.as_ref())?,
+            currency_items(
+                settings.home_currency,
+                settings.currency_default_action,
+                rates.as_ref(),
+            )?,
             &directory,
             cli.verbose,
         );
@@ -97,7 +103,13 @@ fn populate_workflow(workflow: &mut Workflow, cli: &Cli) -> Result<()> {
         None
     };
     let mut unit_engine = None;
-    let item = conversion_item(&query, home, rates.as_ref(), &mut unit_engine)?;
+    let item = conversion_item(
+        &query,
+        settings.home_currency,
+        settings.currency_default_action,
+        rates.as_ref(),
+        &mut unit_engine,
+    )?;
     add_pending_items(workflow, vec![item], &directory, cli.verbose)
 }
 
@@ -146,17 +158,37 @@ fn add_pending_items(
     Ok(())
 }
 
-fn home_currency(workflow: &Workflow, directory: &Path) -> Result<Currency> {
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct WorkflowSettings {
+    home_currency: Currency,
+    currency_default_action: CurrencyDefaultAction,
+}
+
+fn workflow_settings(workflow: &Workflow, directory: &Path) -> Result<WorkflowSettings> {
     let defaults =
         workflow.get_user_defaults(directory.join("info.plist"), directory.join("prefs.plist"))?;
-    let configured = match defaults.get("default_currency") {
+    workflow_settings_from_defaults(&defaults)
+}
+
+fn workflow_settings_from_defaults(
+    defaults: &BTreeMap<String, UserConfiguration>,
+) -> Result<WorkflowSettings> {
+    let configured_currency = match defaults.get("default_currency") {
         Some(UserConfiguration::Select(configuration)) => Some(configuration.config.value.as_str()),
         _ => None,
     };
-    configured
+    let home_currency = configured_currency
         .and_then(Currency::from_code)
         .or_else(|| Currency::from_code("USD"))
-        .ok_or_else(|| anyhow!("USD currency metadata is missing"))
+        .ok_or_else(|| anyhow!("USD currency metadata is missing"))?;
+    let configured_action = match defaults.get("default_action") {
+        Some(UserConfiguration::Select(configuration)) => Some(configuration.config.value.as_str()),
+        _ => None,
+    };
+    Ok(WorkflowSettings {
+        home_currency,
+        currency_default_action: CurrencyDefaultAction::from_preference(configured_action),
+    })
 }
 
 fn workflow_directory() -> Result<PathBuf> {

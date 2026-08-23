@@ -23,6 +23,27 @@ pub struct PendingItem {
     emoji: Option<String>,
 }
 
+/// Default Return action for rate-backed currency results.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum CurrencyDefaultAction {
+    /// Open the currency-pair chart on Xe.com.
+    #[default]
+    OpenWebsite,
+    /// Copy the converted value to the clipboard.
+    CopyToClipboard,
+}
+
+impl CurrencyDefaultAction {
+    /// Parses the stored Alfred preference, falling back to the website action.
+    #[must_use]
+    pub fn from_preference(value: Option<&str>) -> Self {
+        match value {
+            Some("copy_to_clipboard") => Self::CopyToClipboard,
+            _ => Self::OpenWebsite,
+        }
+    }
+}
+
 impl PendingItem {
     fn new(item: Item, emoji: Option<&str>) -> Self {
         Self {
@@ -67,6 +88,7 @@ pub fn invalid_item(message: Option<&str>) -> Item {
 pub fn conversion_item(
     query: &str,
     home: Currency,
+    default_action: CurrencyDefaultAction,
     rates: Option<&ExchangeRates>,
     unit_engine: &mut Option<UnitEngine>,
 ) -> Result<PendingItem> {
@@ -75,7 +97,7 @@ pub fn conversion_item(
         if parse_decimal(parts[0]).is_none() {
             return Ok(PendingItem::new(invalid_item(None), None));
         }
-        return currency_conversion_item(&parts, from, home, rates);
+        return currency_conversion_item(&parts, from, home, default_action, rates);
     }
     if parts
         .iter()
@@ -128,6 +150,7 @@ fn currency_conversion_item(
     parts: &[&str],
     from: Currency,
     home: Currency,
+    default_action: CurrencyDefaultAction,
     rates: Option<&ExchangeRates>,
 ) -> Result<PendingItem> {
     let to_code = match parts {
@@ -159,6 +182,30 @@ fn currency_conversion_item(
         .checked_mul(inverted_rate)
         .ok_or_else(|| anyhow!("inverse currency conversion overflowed"))?;
     let url = xe_url(from, to)?;
+    let actions = currency_actions(
+        default_action,
+        url.as_str(),
+        format!("{} {}", format_decimal(converted), to.code()),
+        format!("{} {}", format_decimal(inverted), from.code()),
+        format!(
+            "Copy {} {} {} to clipboard",
+            format_decimal(converted),
+            to.code(),
+            to.flag()
+        ),
+    );
+    let mut inverse_modifier = Modifier::new().with_subtitle(format!(
+        "{} {} {} ≃ {} {} {}",
+        format_decimal(amount),
+        to.code(),
+        to.flag(),
+        format_decimal(inverted),
+        from.code(),
+        from.flag()
+    ));
+    if let Some(argument) = actions.inverse_arg {
+        inverse_modifier = inverse_modifier.with_arg(argument);
+    }
     let item = Item::with_arg(
         format!(
             "{} {} {} ≃ {} {} {}",
@@ -169,34 +216,13 @@ fn currency_conversion_item(
             to.code(),
             to.flag()
         ),
-        url.as_str(),
+        actions.default_arg,
     )
     .set_subtitle(exchange_rate_subtitle(rates.date))
     .set_quick_look_url(url.as_str())
     .set_valid(true)
-    .try_set_modifier(
-        [ModifierKey::Alt],
-        Modifier::new().with_subtitle(format!(
-            "{} {} {} ≃ {} {} {}",
-            format_decimal(amount),
-            to.code(),
-            to.flag(),
-            format_decimal(inverted),
-            from.code(),
-            from.flag()
-        )),
-    )?
-    .try_set_modifier(
-        [ModifierKey::Cmd],
-        Modifier::new()
-            .with_subtitle(format!(
-                "Copy {} {} {} to clipboard",
-                format_decimal(converted),
-                to.code(),
-                to.flag()
-            ))
-            .with_arg(format!("{} {}", format_decimal(converted), to.code())),
-    )?;
+    .try_set_modifier([ModifierKey::Alt], inverse_modifier)?
+    .try_set_modifier([ModifierKey::Cmd], actions.command_modifier)?;
     Ok(PendingItem::new(item, Some(to.flag())))
 }
 
@@ -204,17 +230,22 @@ fn currency_conversion_item(
 ///
 /// # Errors
 /// Returns an error if a URL or modifier cannot be built.
-pub fn currency_items(home: Currency, rates: Option<&ExchangeRates>) -> Result<Vec<PendingItem>> {
+pub fn currency_items(
+    home: Currency,
+    default_action: CurrencyDefaultAction,
+    rates: Option<&ExchangeRates>,
+) -> Result<Vec<PendingItem>> {
     CURRENCIES
         .iter()
         .copied()
-        .map(|currency| currency_catalog_item(currency, home, rates))
+        .map(|currency| currency_catalog_item(currency, home, default_action, rates))
         .collect()
 }
 
 fn currency_catalog_item(
     currency: Currency,
     home: Currency,
+    default_action: CurrencyDefaultAction,
     rates: Option<&ExchangeRates>,
 ) -> Result<PendingItem> {
     if currency != home
@@ -222,9 +253,30 @@ fn currency_catalog_item(
     {
         let inverse = divide_like_dart(Decimal::ONE, rate)?;
         let url = xe_url(currency, home)?;
+        let actions = currency_actions(
+            default_action,
+            url.as_str(),
+            format!("{} {}", format_decimal(rate), home.code()),
+            format!("{} {}", format_decimal(inverse), currency.code()),
+            format!(
+                "Copy {} {} {} to clipboard",
+                format_decimal(rate),
+                home.code(),
+                home.flag()
+            ),
+        );
+        let mut inverse_modifier = Modifier::new().with_subtitle(format!(
+            "1 {} ≃ {} {}",
+            home.code(),
+            format_decimal(inverse),
+            currency.code()
+        ));
+        if let Some(argument) = actions.inverse_arg {
+            inverse_modifier = inverse_modifier.with_arg(argument);
+        }
         let item = Item::with_arg(
             format!("{} ({})", currency.name(), currency.code()),
-            url.as_str(),
+            actions.default_arg,
         )
         .set_subtitle(format!(
             "1 {} ≃ {} {}",
@@ -236,26 +288,8 @@ fn currency_catalog_item(
         .set_match_text(format!("{} ({})", currency.name(), currency.code()))
         .set_text(ItemText::new(currency.code()).with_large_type(currency.code()))
         .set_valid(true)
-        .try_set_modifier(
-            [ModifierKey::Alt],
-            Modifier::new().with_subtitle(format!(
-                "1 {} ≃ {} {}",
-                home.code(),
-                format_decimal(inverse),
-                currency.code()
-            )),
-        )?
-        .try_set_modifier(
-            [ModifierKey::Cmd],
-            Modifier::new()
-                .with_subtitle(format!(
-                    "Copy {} {} {} to clipboard",
-                    format_decimal(rate),
-                    home.code(),
-                    home.flag()
-                ))
-                .with_arg(format!("{} {}", format_decimal(rate), home.code())),
-        )?;
+        .try_set_modifier([ModifierKey::Alt], inverse_modifier)?
+        .try_set_modifier([ModifierKey::Cmd], actions.command_modifier)?;
         return Ok(PendingItem::new(item, Some(currency.flag())));
     }
 
@@ -281,6 +315,37 @@ fn currency_catalog_item(
             .with_arg(format!("{} {}", home.name(), home.code())),
     )?;
     Ok(PendingItem::new(item, Some(currency.flag())))
+}
+
+struct CurrencyActions {
+    default_arg: String,
+    command_modifier: Modifier,
+    inverse_arg: Option<String>,
+}
+
+fn currency_actions(
+    default_action: CurrencyDefaultAction,
+    website_url: &str,
+    copy_arg: String,
+    inverse_copy_arg: String,
+    copy_subtitle: String,
+) -> CurrencyActions {
+    match default_action {
+        CurrencyDefaultAction::OpenWebsite => CurrencyActions {
+            default_arg: website_url.to_owned(),
+            command_modifier: Modifier::new()
+                .with_subtitle(copy_subtitle)
+                .with_arg(copy_arg),
+            inverse_arg: None,
+        },
+        CurrencyDefaultAction::CopyToClipboard => CurrencyActions {
+            default_arg: copy_arg,
+            command_modifier: Modifier::new()
+                .with_subtitle("Open currency-pair chart on Xe.com")
+                .with_arg(website_url),
+            inverse_arg: Some(inverse_copy_arg),
+        },
+    }
 }
 
 /// Builds Alfred items from Numbat's public unit metadata.
