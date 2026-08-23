@@ -1,3 +1,12 @@
+## 1.3.0-dev
+
+- [FEAT] migrate the Alfred workflow runtime from Dart to Rust while preserving currency conversion, caching, modifiers, updater behaviour, and existing workflow preferences
+- [FEAT] replace `units_converter` with Numbat, adding native expression support while retaining historical unit aliases, coefficients, formatting, and friendly conversion syntax
+- [FIX] preserve precise ECB currency calculations, offline stale-cache fallback, legacy Dart-cache imports, and TARGET publication-day handling
+- [FIX] validate and atomically cache JoyPixels assets, remove invalid downloads, and bound concurrent image-fetch latency
+- [FIX] keep verbose and updater diagnostics from replacing valid Alfred JSON results, and reject malformed currency queries instead of ignoring trailing input
+- [CHORE] replace Dart build and release tooling with Rust CI, Cargo-derived MSRV checks, third-party license generation, and signed universal macOS packaging
+
 ## 1.2.7
 
 - [FEAT] add new unit conversions for energy, mass, pressure, speed, temperature, torque, and volume
