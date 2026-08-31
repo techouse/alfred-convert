@@ -1026,9 +1026,9 @@ dependencies = [
 
 [[package]]
 name = "numbat"
-version = "1.23.0"
+version = "1.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "272f6b0dd1e8d3ae76b3d8474a5fc9dc344053d727df3cf41314255d135fd437"
+checksum = "606074768d2cae18c23bfa37c57c34db7a9f0d167487d35490620a06a89698d6"
 dependencies = [
  "codespan-reporting",
  "compact_str",
