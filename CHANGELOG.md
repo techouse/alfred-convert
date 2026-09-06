@@ -1,3 +1,10 @@
+## 1.3.3
+
+- [CHORE] update [numbat](https://crates.io/crates/numbat) dependency to [v1.24.0](https://github.com/sharkdp/numbat/releases/tag/v1.24.0)
+- [CHORE] update the [flate2](https://crates.io/crates/flate2) development dependency to [1.1.10](https://github.com/rust-lang/flate2-rs/releases/tag/1.1.10)
+- [FIX] standardize legacy litre, fuel-economy, energy, pressure, area, and volume aliases on canonical SI notation while preserving historical shorthand inputs and legacy routing
+- [CHORE] add regression coverage for canonical aliases, legacy conversion output, and Alfred actions
+
 ## 1.3.2
 
 - [FIX] remove the discontinued ECB EUR/RUB reference rate from the currency catalogue
