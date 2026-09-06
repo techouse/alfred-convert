@@ -102,6 +102,37 @@ fn legacy_symbol_should_be_used_in_item_and_wolfram_action() -> anyhow::Result<(
 }
 
 #[test]
+fn canonical_legacy_alias_should_use_the_legacy_item_path() -> anyhow::Result<()> {
+    let home = Currency::from_code("USD").ok_or_else(|| anyhow::anyhow!("USD missing"))?;
+    let mut engine = None;
+    let item = conversion_item(
+        "1 kpa to Pa",
+        home,
+        DefaultAction::OpenWebsite,
+        DefaultAction::OpenWebsite,
+        None,
+        &mut engine,
+    )?
+    .into_item(None);
+    let expected_url = "https://www.wolframalpha.com/input?i=1.0+kPa+to+Pa";
+    assert_eq!(
+        (
+            item.title(),
+            item.subtitle(),
+            item.arg(),
+            item.quick_look_url(),
+        ),
+        (
+            "1 kPa = 1,000 Pa",
+            Some("Based on the fact that 1 kPa = 1,000 Pa"),
+            Some(expected_url),
+            Some(expected_url),
+        )
+    );
+    Ok(())
+}
+
+#[test]
 fn trailing_currency_tokens_should_be_rejected_instead_of_ignored() -> anyhow::Result<()> {
     let home = currency("USD")?;
     let rates = sample_rates()?;
@@ -455,22 +486,22 @@ fn customary_system_should_change_legacy_fluid_ounce_rendering() -> anyhow::Resu
     for (system, expected_title, expected_subtitle, expected_value, expected_url) in [
         (
             CustomarySystem::Imperial,
-            "1 imp fl oz = 28.413 ml",
-            "Based on the fact that 1 imp fl oz = 28.413 ml",
-            "28.413 ml",
-            "https://www.wolframalpha.com/input?i=1.0+imp+fl+oz+to+ml",
+            "1 imp fl oz = 28.413 mL",
+            "Based on the fact that 1 imp fl oz = 28.413 mL",
+            "28.413 mL",
+            "https://www.wolframalpha.com/input?i=1.0+imp+fl+oz+to+mL",
         ),
         (
             CustomarySystem::UsCustomary,
-            "1 US fl oz = 29.574 ml",
-            "Based on the fact that 1 US fl oz = 29.574 ml",
-            "29.574 ml",
-            "https://www.wolframalpha.com/input?i=1.0+US+fl+oz+to+ml",
+            "1 US fl oz = 29.574 mL",
+            "Based on the fact that 1 US fl oz = 29.574 mL",
+            "29.574 mL",
+            "https://www.wolframalpha.com/input?i=1.0+US+fl+oz+to+mL",
         ),
     ] {
         let mut engine = None;
         let item = conversion_item_with_customary_system(
-            "1 floz ml",
+            "1 floz mL",
             home,
             DefaultAction::OpenWebsite,
             DefaultAction::OpenWebsite,
@@ -496,7 +527,7 @@ fn customary_system_should_change_legacy_fluid_ounce_rendering() -> anyhow::Resu
 
         let mut engine = None;
         let copy_item = conversion_item_with_customary_system(
-            "1 floz ml",
+            "1 floz mL",
             home,
             DefaultAction::OpenWebsite,
             DefaultAction::CopyToClipboard,

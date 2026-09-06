@@ -196,6 +196,11 @@ const CONVERTIBLE_DART_ALIASES: &[&str] = &[
     "tsp.",
 ];
 
+const CANONICAL_LEGACY_ALIASES: &[&str] = &[
+    "kWh", "Pa", "kPa", "hPa", "inHg", "m²", "cm²", "in²", "ft²", "mi²", "yd²", "mm²", "km²", "m³",
+    "cm³", "ft³", "in³", "mm³",
+];
+
 #[test]
 fn legacy_shorthand_should_be_evaluated_by_numbat() -> anyhow::Result<()> {
     let mut engine = UnitEngine::new()?;
@@ -407,7 +412,7 @@ fn compatibility_aliases_should_keep_imperial_gallon_semantics() -> anyhow::Resu
     let conversion =
         legacy_conversion("1 gal l").ok_or_else(|| anyhow::anyhow!("legacy conversion missing"))?;
     let result = engine.evaluate_legacy(conversion)?;
-    assert_eq!(result.result, "1 imp gal = 4.546 l");
+    assert_eq!(result.result, "1 imp gal = 4.546 L");
     Ok(())
 }
 
@@ -472,13 +477,110 @@ fn customary_system_should_preserve_explicit_us_aliases_and_native_units() -> an
     let mut engine = UnitEngine::new()?;
     assert_eq!(
         engine.evaluate_native("1 gallon to liter")?.result,
-        "3.78541 l"
+        "3.78541 L"
     );
     assert_eq!(
         engine.evaluate_native("1 imperial_gallon to liter")?.result,
-        "4.54609 l"
+        "4.54609 L"
     );
-    assert_eq!(engine.evaluate_native("1 cup to mL")?.result, "236.588 ml");
+    assert_eq!(engine.evaluate_native("1 cup to mL")?.result, "236.588 mL");
+    Ok(())
+}
+
+#[test]
+fn legacy_liter_aliases_should_use_uppercase_si_symbols() {
+    for (alias, expected_symbol) in [
+        ("l", "L"),
+        ("L", "L"),
+        ("ml", "mL"),
+        ("mL", "mL"),
+        ("fl", "fL"),
+        ("fL", "fL"),
+        ("pl", "pL"),
+        ("pL", "pL"),
+        ("nl", "nL"),
+        ("nL", "nL"),
+        ("µl", "µL"),
+        ("µL", "µL"),
+        ("dl", "dL"),
+        ("dL", "dL"),
+        ("cl", "cL"),
+        ("cL", "cL"),
+        ("km/l", "km/L"),
+        ("km/L", "km/L"),
+        ("l/100km", "L/100km"),
+        ("L/100km", "L/100km"),
+    ] {
+        assert_eq!(
+            legacy_unit(alias).map(|unit| unit.symbol),
+            Some(expected_symbol),
+            "{alias}"
+        );
+    }
+}
+
+#[test]
+fn canonical_symbols_should_resolve_as_legacy_aliases() -> anyhow::Result<()> {
+    for (historical, canonical) in [
+        ("kwh", "kWh"),
+        ("pa", "Pa"),
+        ("kpa", "kPa"),
+        ("hpa", "hPa"),
+        ("inhg", "inHg"),
+        ("m2", "m²"),
+        ("cm2", "cm²"),
+        ("in2", "in²"),
+        ("ft2", "ft²"),
+        ("mi2", "mi²"),
+        ("yd2", "yd²"),
+        ("mm2", "mm²"),
+        ("km2", "km²"),
+        ("m3", "m³"),
+        ("cm3", "cm³"),
+        ("ft3", "ft³"),
+        ("in3", "in³"),
+        ("mm3", "mm³"),
+    ] {
+        let historical_unit =
+            legacy_unit(historical).ok_or_else(|| anyhow::anyhow!("{historical} missing"))?;
+        let canonical_unit =
+            legacy_unit(canonical).ok_or_else(|| anyhow::anyhow!("{canonical} missing"))?;
+        assert_eq!(canonical_unit, historical_unit, "{canonical}");
+    }
+
+    let mut engine = UnitEngine::new()?;
+    for alias in CANONICAL_LEGACY_ALIASES {
+        let unit = legacy_unit(alias).ok_or_else(|| anyhow::anyhow!("{alias} missing"))?;
+        engine
+            .evaluate_legacy(LegacyConversion {
+                amount: "1",
+                from: unit,
+                to: unit,
+            })
+            .map_err(|error| anyhow::anyhow!("{alias} cannot be evaluated: {error}"))?;
+    }
+    Ok(())
+}
+
+#[test]
+fn canonical_symbols_should_keep_legacy_conversion_routing() -> anyhow::Result<()> {
+    let cases = [
+        ("1 kwh to kWh", "1 kWh = 1 kWh"),
+        ("1 kpa to Pa", "1 kPa = 1,000 Pa"),
+        ("1 inhg to Pa", "1 inHg = 3,386.388 Pa"),
+        ("1 m2 to m²", "1 m² = 1 m²"),
+        ("1 m3 to m³", "1 m³ = 1 m³"),
+    ];
+    let mut engine = UnitEngine::new()?;
+    for (query, expected) in cases {
+        let conversion =
+            legacy_conversion(query).ok_or_else(|| anyhow::anyhow!("{query} should parse"))?;
+        assert_eq!(
+            engine.evaluate_legacy(conversion)?.result,
+            expected,
+            "{query}"
+        );
+    }
     Ok(())
 }
 
@@ -487,14 +589,14 @@ fn customary_system_should_match_legacy_volume_and_mpg_coefficients() -> anyhow:
     let cases = [
         (
             "1 floz ml",
-            "1 imp fl oz = 28.413 ml",
-            "1 US fl oz = 29.574 ml",
+            "1 imp fl oz = 28.413 mL",
+            "1 US fl oz = 29.574 mL",
         ),
-        ("1 gal l", "1 imp gal = 4.546 l", "1 US gal = 3.785 l"),
-        ("1 pt ml", "1 imp pt = 568.261 ml", "1 US pt = 473.176 ml"),
-        ("1 tbsp. ml", "1 tbsp. = 14.207 ml", "1 tbsp. = 14.787 ml"),
-        ("1 tsp. ml", "1 tsp. = 3.552 ml", "1 tsp. = 4.929 ml"),
-        ("1 mpg km/l", "1 mpg = 0.354 km/l", "1 mpg = 0.425 km/l"),
+        ("1 gal l", "1 imp gal = 4.546 L", "1 US gal = 3.785 L"),
+        ("1 pt ml", "1 imp pt = 568.261 mL", "1 US pt = 473.176 mL"),
+        ("1 tbsp. ml", "1 tbsp. = 14.207 mL", "1 tbsp. = 14.787 mL"),
+        ("1 tsp. ml", "1 tsp. = 3.552 mL", "1 tsp. = 4.929 mL"),
+        ("1 mpg km/l", "1 mpg = 0.354 km/L", "1 mpg = 0.425 km/L"),
     ];
     for (query, expected_imperial, expected_us) in cases {
         let mut engine = UnitEngine::new()?;
