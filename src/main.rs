@@ -19,7 +19,7 @@ use anyhow::{Result, anyhow};
 use jiff::Timestamp;
 
 const GITHUB_REPOSITORY_URL: &str = "https://github.com/techouse/alfred-convert";
-const UPDATE_INTERVAL: Duration = Duration::from_secs(7 * 24 * 60 * 60);
+const UPDATE_INTERVAL: Duration = Duration::from_hours(168);
 
 fn main() -> ExitCode {
     let cli = match Cli::parse(std::env::args().skip(1)) {

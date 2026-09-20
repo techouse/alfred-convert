@@ -1,3 +1,8 @@
+## 1.3.4
+
+- [CHORE] bump MSRV to 1.92
+- [CHORE] update [alfred_workflow_rs](https://crates.io/crates/alfred_workflow_rs) dependency to [v1.0.2](https://github.com/techouse/alfred_workflow_rs/releases/tag/v1.0.2)
+
 ## 1.3.3
 
 - [CHORE] update [numbat](https://crates.io/crates/numbat) dependency to [v1.24.0](https://github.com/sharkdp/numbat/releases/tag/v1.24.0)
