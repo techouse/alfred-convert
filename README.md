@@ -67,7 +67,7 @@ The Workflow Configuration provides separate Default monetary action and Default
 
 ## Development
 
-The workflow is an unpublished Rust 2024 crate and requires Rust 1.88 or newer.
+The workflow is an unpublished Rust 2024 crate and requires Rust 1.92 or newer.
 Install the locked license generator before running the full local checks:
 
 ```shell
